@@ -20,7 +20,7 @@ class SignupDatingPreferencesPage extends StatefulWidget {
 }
 
 class _SignupDatingPreferencesPageState extends State<SignupDatingPreferencesPage> {
-  Set<String> _genderInterests = { 'Men', 'Non-Binary', 'Women' };
+  Set<String> _genderInterests = {};
   Set<String> _relationshipInterests = {};
   GenderKind? _selectedGender;
 

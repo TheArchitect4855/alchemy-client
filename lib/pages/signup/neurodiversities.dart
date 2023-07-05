@@ -22,6 +22,7 @@ class _SignupNeurodiversitiesPageState extends State<SignupNeurodiversitiesPage>
   void initState() {
     super.initState();
     _dataFuture = rootBundle.loadString('assets/neurodiversities.txt');
+    widget.profileData['neurodiversities'] = _selectedNeurodiversities;
   }
 
   @override

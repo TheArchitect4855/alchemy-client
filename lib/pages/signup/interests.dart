@@ -21,6 +21,7 @@ class _SignupInterestsPageState extends State<SignupInterestsPage> {
   void initState() {
     super.initState();
     _dataFuture = rootBundle.loadString('assets/interests.txt');
+    widget.profileData['interests'] = _selectedInterests;
   }
 
   @override
