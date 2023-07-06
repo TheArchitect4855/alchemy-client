@@ -7,7 +7,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart';
 
 const timeout = Duration(seconds: 20);
-final debugUri = Uri(scheme: 'http', host: 'localhost', port: 8787);
+final debugUri = Uri(
+    scheme: 'http',
+    host: '10.0.2.2',
+    port:
+        8787); // 10.0.2.2 is "loopback on the host machine" for Android emulators
 final liveUri = Uri(scheme: 'https', host: 'api.kurtisknodel.workers.dev');
 
 class RequestsService {
