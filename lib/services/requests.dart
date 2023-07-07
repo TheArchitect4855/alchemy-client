@@ -160,7 +160,8 @@ abstract class RequestsServiceException implements Exception {
 
   @override
   String toString() {
-    var msg = 'Requests Service Exception: $message';
+    var msg =
+        'Requests Service Exception: ${message.trim().isEmpty ? 'no further information' : message}';
     if (inner != null) msg += '\n\tfrom $inner';
     return msg;
   }
