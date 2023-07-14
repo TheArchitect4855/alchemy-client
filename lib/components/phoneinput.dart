@@ -1,6 +1,7 @@
 import 'package:alchemy/data/callingcode.dart';
 import 'package:alchemy/data/phonenumber.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const formatErrorMessage = 'Please enter a phone number in E.123 international format (e.g. +1 234 567 8910).';
 
@@ -22,6 +23,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
   @override
   void initState() {
     super.initState();
+    RawKeyboard.instance.addListener(_onKeyboard);
     _textController.addListener(() {
       if (_textController.text.isEmpty) return;
 
@@ -88,7 +90,16 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
 
   @override
   void dispose() {
+    RawKeyboard.instance.removeListener(_onKeyboard);
     _textController.dispose();
     super.dispose();
+  }
+
+  void _onKeyboard(RawKeyEvent e) {
+    if (e.logicalKey == LogicalKeyboardKey.backspace && _textController.text.isEmpty) {
+      setState(() {
+        _callingCode = null;
+      });
+    }
   }
 }
