@@ -3,7 +3,7 @@ import 'package:alchemy/components/bottomcard.dart';
 import 'package:alchemy/components/phoneinput.dart';
 import 'package:alchemy/data/phonenumber.dart';
 import 'package:alchemy/logger.dart';
-import 'package:alchemy/pages/loginCode.dart';
+import 'package:alchemy/pages/logincode.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:flutter/material.dart';
@@ -27,26 +27,32 @@ class _LoginPageState extends State<LoginPage> {
     return BottomCard(
       title: 'Log In',
       children: [
-        PhoneNumberInput(onChanged: (v) => setState(() {
-          _phoneNumber = v;
-        })),
+        PhoneNumberInput(
+            onChanged: (v) => setState(() {
+                  _phoneNumber = v;
+                })),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const Text('Text me via WhatsApp'),
-            Switch(
-              value: _useWhatsApp,
-              onChanged: (v) => setState(() {
-                _useWhatsApp = v;
-              }),
-            ),
-          ]
-        ),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          const Text('Text me via WhatsApp'),
+          Switch(
+            value: _useWhatsApp,
+            onChanged: (v) => setState(() {
+              _useWhatsApp = v;
+            }),
+          ),
+        ]),
         const SizedBox(height: 16),
         BigButton(text: 'NEXT', onPressed: _isBusy ? null : _logIn),
-        _errorText == null ? const SizedBox(height: 20) : Text(_errorText!, style: theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error), textAlign: TextAlign.center),
-        Text('Don’t have an account? No problem! Enter your phone number and we’ll create one for you.', style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
+        _errorText == null
+            ? const SizedBox(height: 20)
+            : Text(_errorText!,
+                style: theme.textTheme.bodyMedium!
+                    .apply(color: theme.colorScheme.error),
+                textAlign: TextAlign.center),
+        Text(
+            'Don’t have an account? No problem! Enter your phone number and we’ll create one for you.',
+            style: theme.textTheme.bodySmall,
+            textAlign: TextAlign.center),
       ],
     );
   }
@@ -65,17 +71,23 @@ class _LoginPageState extends State<LoginPage> {
       _isBusy = true;
     });
 
-   String? errorText;
+    String? errorText;
     try {
       final requestsService = RequestsService.instance;
-      final channel = _useWhatsApp ? LoginCodeChannel.whatsapp : LoginCodeChannel.sms;
-      await AuthService.instance.requestLoginCode(_phoneNumber!, channel, requestsService);
+      final channel =
+          _useWhatsApp ? LoginCodeChannel.whatsapp : LoginCodeChannel.sms;
+      await AuthService.instance
+          .requestLoginCode(_phoneNumber!, channel, requestsService);
       if (!mounted) {
         Logger.error(runtimeType, 'Context was unmounted!');
         return;
       }
 
-      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginCodePage(phoneNumber: _phoneNumber!, channel: channel)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) =>
+                  LoginCodePage(phoneNumber: _phoneNumber!, channel: channel)));
     } on RequestsServiceClientException catch (e) {
       Logger.warnException(runtimeType, e);
       errorText = 'Network error.';
