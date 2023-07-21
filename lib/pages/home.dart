@@ -23,7 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final Future<List<Profile>> _profilesFuture;
+  late Future<List<Profile>> _profilesFuture;
+  late  DateTime _profilesLastRefresh;
   int _currentIndex = 0;
   int _currentProfile = 0;
   int _numUnreadConversations = 0;
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _profilesFuture = ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
+    _profilesLastRefresh = DateTime.now();
     _loadMatches();
   }
 
@@ -112,6 +114,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         onTap: (v) => setState(() {
+          final elapsed = DateTime.now().difference(_profilesLastRefresh);
+          if (elapsed.inMinutes > 5) _refreshProfiles();
           _currentIndex = v;
         }),
         currentIndex: _currentIndex,
@@ -155,6 +159,14 @@ class _HomePageState extends State<HomePage> {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Error liking profile');
     }
+  }
+
+  void _refreshProfiles() async {
+    Logger.info(runtimeType, 'Refreshing explore profiles');
+    setState(() {
+      _profilesLastRefresh = DateTime.now();
+      _profilesFuture = ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
+    });
   }
 
   void _unmatch(Match match) async {
