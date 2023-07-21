@@ -28,26 +28,30 @@ class BottomCard extends StatelessWidget {
               repeat: ImageRepeat.repeat,
             ),
           ),
-          child: Container(
-            constraints: BoxConstraints(minHeight: screenSize.height * 0.7, minWidth: screenSize.width, maxWidth: screenSize.width),            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.background,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            ),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: crossAxisAlignment,
-                children: [
-                  Image.asset(
-                    'assets/icon.png',
-                    height: 130,
-                  ),
-                  Text(title, style: theme.textTheme.displaySmall, textAlign: TextAlign.center),
-                  const SizedBox(height: 24),
-                  ...children,
-                ],
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Container(
+              constraints: BoxConstraints(minHeight: screenSize.height * 0.7, minWidth: screenSize.width, maxWidth: screenSize.width),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.background,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: crossAxisAlignment,
+                  children: [
+                    Image.asset(
+                      'assets/icon.png',
+                      height: 130,
+                    ),
+                    Text(title, style: theme.textTheme.displaySmall, textAlign: TextAlign.center),
+                    const SizedBox(height: 24),
+                    ...children,
+                  ],
+                ),
               ),
             ),
           ),
