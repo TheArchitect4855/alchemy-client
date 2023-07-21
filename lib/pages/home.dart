@@ -149,8 +149,15 @@ class _HomePageState extends State<HomePage> {
     if (!isLiked) return;
 
     try {
-      await ExploreService.instance
+      final match = await ExploreService.instance
           .likeProfile(profile, RequestsService.instance);
+
+      if (match != null) {
+        _matchesFuture.then((value) => setState(() {
+              value.add(match);
+              _numUnreadConversations += 1;
+            }));
+      }
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Error liking profile');
