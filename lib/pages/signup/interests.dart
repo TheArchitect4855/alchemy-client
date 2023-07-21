@@ -1,6 +1,7 @@
 import 'package:alchemy/components/chipselector.dart';
 import 'package:alchemy/components/multipage_bottomcard.dart';
 import 'package:alchemy/pages/signup/datingpreferences.dart';
+import 'package:alchemy/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -34,7 +35,8 @@ class _SignupInterestsPageState extends State<SignupInterestsPage> {
 
   Widget _buildFuture(BuildContext context, AsyncSnapshot<String> snapshot) {
     final theme = Theme.of(context);
-    final errorStyle = theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error);
+    final errorStyle =
+        theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error);
     List<Widget> children;
     if (snapshot.hasData) {
       final options = snapshot.data!.split('\n').map((e) => e.trim()).toList();
@@ -42,9 +44,11 @@ class _SignupInterestsPageState extends State<SignupInterestsPage> {
       children = [
         ChipSelector(
           label: 'Interests',
-          helperText: 'Select as many or as few as you’d like. These will be shown on your profile and can be changed at any time.',
+          helperText:
+              'Select as many or as few as you’d like. These will be shown on your profile and can be changed at any time.',
           options: options,
           selected: _selectedInterests,
+          maxSelections: AuthService.maxTags,
           onChanged: (options, selected) => setState(() {
             _selectedInterests = selected;
             widget.profileData['interests'] = selected;
@@ -54,7 +58,8 @@ class _SignupInterestsPageState extends State<SignupInterestsPage> {
     } else if (snapshot.hasError) {
       children = [
         Text('An error occurred:', style: errorStyle),
-        Text(snapshot.error?.toString() ?? 'No further information', style: errorStyle),
+        Text(snapshot.error?.toString() ?? 'No further information',
+            style: errorStyle),
       ];
     } else {
       children = [

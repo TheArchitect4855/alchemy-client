@@ -7,6 +7,7 @@ const maxPhotoSizeBytes = 1500000;
 
 class PhotosService {
   static final PhotosService instance = PhotosService();
+  static const int maxPhotoCount = 10;
 
   Future<String> uploadPhoto(XFile file, RequestsService requests) async {
     final data = await file.readAsBytes();
@@ -29,9 +30,12 @@ class PhotosService {
       photo = encodeJpg(image, quality: quality);
     }
 
-    if (photo.lengthInBytes > maxPhotoSizeBytes) throw PhotosServiceResizeException();
+    if (photo.lengthInBytes > maxPhotoSizeBytes) {
+      throw PhotosServiceResizeException();
+    }
 
-    final String url = await requests.postBinary('/photos', photo, 'image/jpeg', (v) => v['url']);
+    final String url = await requests.postBinary(
+        '/photos', photo, 'image/jpeg', (v) => v['url']);
     return url;
   }
 
@@ -39,7 +43,7 @@ class PhotosService {
     try {
       final uri = Uri.parse(url);
       final key = uri.queryParameters['key'];
-      await requests.delete('/photos', (v) => v, urlParams: { 'key': key });
+      await requests.delete('/photos', (v) => v, urlParams: {'key': key});
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
     }

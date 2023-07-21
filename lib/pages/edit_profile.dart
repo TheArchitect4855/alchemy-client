@@ -47,7 +47,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _name = profile.name;
     _bio = profile.bio;
     _photoUrls = profile.photoUrls;
-    _relationshipInterests = profile.relationshipInterests.map((e) => capitalizeWords(e.trim())).toSet();
+    _relationshipInterests = profile.relationshipInterests
+        .map((e) => capitalizeWords(e.trim()))
+        .toSet();
     _neurodiversities = profile.neurodiversities.map((e) => e.trim()).toSet();
     _interests = profile.interests.map((e) => e.trim()).toSet();
     _pronouns = profile.pronouns;
@@ -55,81 +57,88 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _genderKind = profile.genderKind;
     if (_genderKind == GenderKind.nonbinary) {
       _genderIdentity = profile.gender;
-      if (profile.gender != 'nonbinary') _genderInputController.text = profile.gender;
+      if (profile.gender != 'nonbinary') {
+        _genderInputController.text = profile.gender;
+      }
     }
 
-    _neurodiversitiesFuture = rootBundle.loadString('assets/neurodiversities.txt');
+    _neurodiversitiesFuture =
+        rootBundle.loadString('assets/neurodiversities.txt');
     _interestsFuture = rootBundle.loadString('assets/interests.txt');
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final photos = _photoUrls.map((e) => ProfilePhoto(
-      photoUrl: e,
-      onRemove: () => _removePhoto(e),
-    )).toList();
+    final photos = _photoUrls
+        .map((e) => ProfilePhoto(
+              photoUrl: e,
+              onRemove: () => _removePhoto(e),
+            ))
+        .cast<Widget>()
+        .toList();
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ...photos,
-                  _isUploadingPhoto ? const SmallCard(child: Center(child: CircularProgressIndicator())) : PhotoUploadButton(onUploadStart: _uploadPhoto),
-                ],
-              ),
+    if (_isUploadingPhoto) {
+      photos.add(
+          const SmallCard(child: Center(child: CircularProgressIndicator())));
+    } else if (photos.length < PhotosService.maxPhotoCount) {
+      photos.add(PhotoUploadButton(onUploadStart: _uploadPhoto));
+    }
+
+    return Stack(alignment: Alignment.bottomCenter, children: [
+      ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: photos,
             ),
-            WideTextField(
-              defaultValue: _name,
-              labelText: 'Name',
-              maxLength: 128,
-              onChanged: (v) => setState(() {
-                _name = v;
-              }),
-            ),
-            WideTextField(
-              defaultValue: _pronouns ?? '',
-              labelText: 'Pronouns',
-              maxLength: 32,
-              onChanged: (v) => setState(() {
-                _pronouns = v;
-              }),
-            ),
-            WideTextField(
-              defaultValue: _bio,
-              labelText: 'Bio',
-              maxLength: 1024,
-              maxLines: null,
-              onChanged: (v) => setState(() {
-                _bio = v;
-              }),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: _buildConditionals(theme),
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: FilledButton(
-            onPressed: _saveProfile,
-            child: const Text('Save'),
           ),
+          WideTextField(
+            defaultValue: _name,
+            labelText: 'Name',
+            maxLength: 128,
+            onChanged: (v) => setState(() {
+              _name = v;
+            }),
+          ),
+          WideTextField(
+            defaultValue: _pronouns ?? '',
+            labelText: 'Pronouns',
+            maxLength: 32,
+            onChanged: (v) => setState(() {
+              _pronouns = v;
+            }),
+          ),
+          WideTextField(
+            defaultValue: _bio,
+            labelText: 'Bio',
+            maxLength: 1024,
+            maxLines: null,
+            onChanged: (v) => setState(() {
+              _bio = v;
+            }),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _buildConditionals(theme),
+            ),
+          ),
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FilledButton(
+          onPressed: _saveProfile,
+          child: const Text('Save'),
         ),
-      ]
-    );
+      ),
+    ]);
   }
 
   List<Widget> _buildConditionals(ThemeData theme) {
@@ -142,7 +151,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ButtonSegment(value: GenderKind.nonbinary, label: Text('Non-Binary')),
           ButtonSegment(value: GenderKind.woman, label: Text('Woman')),
         ],
-        selected: { _genderKind },
+        selected: {_genderKind},
         onSelectionChanged: (v) => setState(() {
           _genderKind = v.first;
         }),
@@ -186,7 +195,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (_allNeurodiversities == null) {
-              final allSet = snapshot.data!.split('\n').map((e) => e.trim()).toSet();
+              final allSet =
+                  snapshot.data!.split('\n').map((e) => e.trim()).toSet();
               allSet.addAll(_neurodiversities);
               _allNeurodiversities = allSet.toList();
             }
@@ -211,7 +221,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         future: _interestsFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            _allInterests ??= snapshot.data!.split('\n').map((e) => e.trim()).toList();
+            _allInterests ??=
+                snapshot.data!.split('\n').map((e) => e.trim()).toList();
             return ChipSelector(
               label: 'Interests',
               options: _allInterests!,
@@ -246,7 +257,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       setState(() {
         _photoUrls.remove(url);
       });
-      
+
       await PhotosService.instance.removePhoto(url, RequestsService.instance);
     }
   }
@@ -281,21 +292,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
         gender = 'woman';
         break;
       case GenderKind.nonbinary:
-        gender = (_genderIdentity == null || _genderIdentity!.trim().isEmpty) ? 'nonbinary' : _genderIdentity!;
+        gender = (_genderIdentity == null || _genderIdentity!.trim().isEmpty)
+            ? 'nonbinary'
+            : _genderIdentity!;
         break;
     }
 
     try {
       await AuthService.instance.updateProfile(
-        _name,
-        _bio,
-        gender,
-        _relationshipInterests,
-        _neurodiversities,
-        _interests,
-        _pronouns,
-        RequestsService.instance
-      );
+          _name,
+          _bio,
+          gender,
+          _relationshipInterests,
+          _neurodiversities,
+          _interests,
+          _pronouns,
+          RequestsService.instance);
 
       if (!mounted) return;
       textSnackbar(context, 'Successfully updated profile');

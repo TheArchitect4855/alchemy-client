@@ -51,23 +51,25 @@ class _SignupPhotosPageState extends State<SignupPhotosPage> {
     }
 
     final photos = _getPhotoWidgets();
+    if (photos.length < PhotosService.maxPhotoCount) {
+      photos.add(PhotoUploadButton(
+        onUploadStart: (urlFuture) => setState(() {
+          _photos.add(urlFuture);
+        }),
+      ));
+    }
+
     return MultiPageBottomCard(
       alignment: CrossAxisAlignment.stretch,
       title: 'Add Photos',
       next: _photos.isEmpty ? null : const SignupTosPage(),
       children: [
-        const Text('You must have at least one photo to complete your profile.'),
+        const Text(
+            'You must have at least one photo to complete your profile.'),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
-          children: [
-            ...photos,
-            PhotoUploadButton(
-              onUploadStart: (urlFuture) => setState(() {
-                _photos.add(urlFuture);
-              }),
-            ),
-          ],
+          children: photos,
         ),
       ],
     );
@@ -76,9 +78,13 @@ class _SignupPhotosPageState extends State<SignupPhotosPage> {
   void _createProfile() async {
     try {
       final p = widget.profileData!;
-      await PreferencesService.instance.setPreferences(Preferences(
-        true, p['showTransgender'], p['genderInterests'],
-      ), RequestsService.instance);
+      await PreferencesService.instance.setPreferences(
+          Preferences(
+            true,
+            p['showTransgender'],
+            p['genderInterests'],
+          ),
+          RequestsService.instance);
 
       final profile = await AuthService.instance.createProfile(
         p['name'],
@@ -98,35 +104,47 @@ class _SignupPhotosPageState extends State<SignupPhotosPage> {
         _isReady = true;
       });
     } on LocationServicePermissionException {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LocationRequestPage()));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (_) => const LocationRequestPage()));
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);
       replaceRoute(context, ErrorPage(message: e.toString()));
     }
   }
 
-  List<Widget> _getPhotoWidgets() => _photos.map((e) => FutureBuilder(
-    future: e,
-    builder: (context, snapshot) {
-      final theme = Theme.of(context);
-      if (snapshot.hasData) {
-        return ProfilePhoto(
-          photoUrl: snapshot.data!,
-          onRemove: () => setState(() {
-            _photos.remove(e);
-            PhotosService.instance.removePhoto(snapshot.data!, RequestsService.instance);
-          }),
-        );
-      } else if (snapshot.hasError) {
-        if (snapshot.error is RequestsServiceHttpException) _onError(snapshot.error as Exception);
-        return SmallCard(child: Icon(Icons.error_outline, color: theme.colorScheme.error));
-      } else {
-        return const SmallCard(child: Center(child: CircularProgressIndicator()));
-      }
-    },
-  )).toList();
+  List<Widget> _getPhotoWidgets() => _photos
+      .map((e) => FutureBuilder(
+            future: e,
+            builder: (context, snapshot) {
+              final theme = Theme.of(context);
+              if (snapshot.hasData) {
+                return ProfilePhoto(
+                  photoUrl: snapshot.data!,
+                  onRemove: () => setState(() {
+                    _photos.remove(e);
+                    PhotosService.instance
+                        .removePhoto(snapshot.data!, RequestsService.instance);
+                  }),
+                );
+              } else if (snapshot.hasError) {
+                if (snapshot.error is RequestsServiceHttpException) {
+                  _onError(snapshot.error as Exception);
+                }
+
+                return SmallCard(
+                    child: Icon(Icons.error_outline,
+                        color: theme.colorScheme.error));
+              } else {
+                return const SmallCard(
+                    child: Center(child: CircularProgressIndicator()));
+              }
+            },
+          ))
+      .cast<Widget>()
+      .toList();
 
   void _onError(Exception e) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => replaceRoute(context, ErrorPage(message: e.toString())));
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => replaceRoute(context, ErrorPage(message: e.toString())));
   }
 }

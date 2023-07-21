@@ -1,4 +1,3 @@
-import 'package:alchemy/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,31 +8,46 @@ class ChipSelector extends StatelessWidget {
   final Set<String> selected;
   final void Function(List<String>, Set<String>) onChanged;
   final bool allowOther;
+  final int? maxSelections;
 
-  const ChipSelector({required this.label, required this.options, required this.selected, required this.onChanged, this.helperText, this.allowOther = false, super.key});
+  const ChipSelector(
+      {required this.label,
+      required this.options,
+      required this.selected,
+      required this.onChanged,
+      this.helperText,
+      this.maxSelections,
+      this.allowOther = false,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final List<Widget> chips = options.map((e) => FilterChip(
-      label: Text(e),
-      selected: selected.contains(e),
-      onSelected: (isSelected) {
-        if (isSelected) {
-          selected.add(e);
-        } else {
-          selected.remove(e);
-        }
+    final isMax = maxSelections != null && selected.length >= maxSelections!;
+    final List<Widget> chips = options
+        .map((e) => FilterChip(
+              label: Text(e),
+              selected: selected.contains(e),
+              onSelected: (isMax && !selected.contains(e))
+                  ? null
+                  : (isSelected) {
+                      if (isSelected) {
+                        selected.add(e);
+                      } else {
+                        selected.remove(e);
+                      }
 
-        onChanged(options, selected);
-      },
-    )).cast<Widget>().toList();
+                      onChanged(options, selected);
+                    },
+            ))
+        .cast<Widget>()
+        .toList();
 
     if (allowOther) {
       chips.add(ActionChip(
         avatar: Icon(Icons.add, color: theme.colorScheme.onBackground),
         label: const Text('Other'),
-        onPressed: () => _addOther(context),
+        onPressed: isMax ? null : () => _addOther(context),
       ));
     }
 
@@ -59,20 +73,19 @@ class ChipSelector extends StatelessWidget {
   }
 
   void _addOther(BuildContext context) async {
-    String? neurodiversity;
-    neurodiversity = await showDialog(
-      context: context, 
+    String? selection;
+    selection = await showDialog(
+      context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Neurodiversity'),
+        title: const Text('Add Other'),
         content: TextField(
           decoration: InputDecoration(
-            labelText: 'Neurodiversity',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           textInputAction: TextInputAction.done,
           maxLength: 30,
           maxLengthEnforcement: MaxLengthEnforcement.enforced,
-          onChanged: (v) => neurodiversity = v,
+          onChanged: (v) => selection = v,
         ),
         actions: [
           TextButton(
@@ -80,17 +93,16 @@ class ChipSelector extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, neurodiversity),
+            onPressed: () => Navigator.pop(context, selection),
             child: const Text('OK'),
           ),
         ],
       ),
     );
 
-    Logger.debug(runtimeType, 'ON ADD NEURODIVERSITY $neurodiversity');
-    if (neurodiversity != null) {
-      options.add(neurodiversity!);
-      selected.add(neurodiversity!);
+    if (selection != null) {
+      options.add(selection!);
+      selected.add(selection!);
       onChanged(options, selected);
     }
   }

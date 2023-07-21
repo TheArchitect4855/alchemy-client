@@ -1,6 +1,7 @@
 import 'package:alchemy/components/chipselector.dart';
 import 'package:alchemy/components/multipage_bottomcard.dart';
 import 'package:alchemy/pages/signup/interests.dart';
+import 'package:alchemy/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,7 +14,8 @@ class SignupNeurodiversitiesPage extends StatefulWidget {
   State<StatefulWidget> createState() => _SignupNeurodiversitiesPageState();
 }
 
-class _SignupNeurodiversitiesPageState extends State<SignupNeurodiversitiesPage> {
+class _SignupNeurodiversitiesPageState
+    extends State<SignupNeurodiversitiesPage> {
   late Future<String> _dataFuture;
   List<String>? _neurodiversities;
   Set<String> _selectedNeurodiversities = {};
@@ -35,18 +37,22 @@ class _SignupNeurodiversitiesPageState extends State<SignupNeurodiversitiesPage>
 
   Widget _futureBuilder(BuildContext context, AsyncSnapshot<String> snapshot) {
     final theme = Theme.of(context);
-    final errorStyle = theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error);
+    final errorStyle =
+        theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error);
     List<Widget> children;
     if (snapshot.hasData) {
-      _neurodiversities ??= snapshot.data!.split('\n').map((e) => e.trim()).toList();
+      _neurodiversities ??=
+          snapshot.data!.split('\n').map((e) => e.trim()).toList();
       _neurodiversities!.sort();
 
       children = [
         ChipSelector(
           label: 'Neurodiversities to Display',
-          helperText: 'Select as many or as few as you’d like. These will be shown on your profile and can be changed at any time.',
+          helperText:
+              'Select as many or as few as you’d like. These will be shown on your profile and can be changed at any time.',
           options: _neurodiversities!,
           selected: _selectedNeurodiversities,
+          maxSelections: AuthService.maxTags,
           onChanged: (options, selected) => setState(() {
             _neurodiversities = options;
             _selectedNeurodiversities = selected;
@@ -58,7 +64,8 @@ class _SignupNeurodiversitiesPageState extends State<SignupNeurodiversitiesPage>
     } else if (snapshot.hasError) {
       children = [
         Text('An error occurred:', style: errorStyle),
-        Text(snapshot.error?.toString() ?? 'No further information', style: errorStyle),
+        Text(snapshot.error?.toString() ?? 'No further information',
+            style: errorStyle),
       ];
     } else {
       children = [
