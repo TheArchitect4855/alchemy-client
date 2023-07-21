@@ -24,16 +24,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Profile>> _profilesFuture;
-  late  DateTime _profilesLastRefresh;
+  late DateTime _profilesLastRefresh;
+  late Future<List<Match>> _matchesFuture;
   int _currentIndex = 0;
   int _currentProfile = 0;
   int _numUnreadConversations = 0;
-  List<Match>? _matches;
 
   @override
   void initState() {
     super.initState();
-    _profilesFuture = ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
+    _profilesFuture = ExploreService.instance.getPotentialMatches(
+        LocationService.instance, RequestsService.instance);
     _profilesLastRefresh = DateTime.now();
     _loadMatches();
   }
@@ -55,23 +56,8 @@ class _HomePageState extends State<HomePage> {
         break;
       case 2:
         currentView = MatchesPage(
-          _matches,
-          onMarkRead: (match) {
-            final i = _matches?.indexWhere((e) => e.profile.uid == match.profile.uid);
-            if (i == null || i < 0) return;
-            setState(() {
-              _matches![i] = match.copyWith(numUnread: 0);
-              _numUnreadConversations -= 1;
-            });
-          },
-          onMessage: (match, message) {
-            final i = _matches?.indexWhere((e) => e.profile.uid == match.profile.uid);
-            if (i == null || i < 0) return;
-            setState(() {
-              _matches![i] = match.copyWith(lastMessage: message);
-            });
-          },
-          onUnmatch: _unmatch,
+          _matchesFuture,
+          onUpdate: _loadMatches,
         );
         break;
       default:
@@ -84,16 +70,19 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(8),
           child: Image.asset('assets/icon-crop.png'),
         ),
-        title: Text('alchemy', style: theme.textTheme.titleLarge!.apply(color: theme.colorScheme.primary)),
+        title: Text('alchemy',
+            style: theme.textTheme.titleLarge!
+                .apply(color: theme.colorScheme.primary)),
         actions: [
           IconButton(
             color: Colors.black38,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PreferencesPage())),
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const PreferencesPage())),
             icon: const Icon(Icons.settings),
           ),
         ],
       ),
-      body:  currentView,
+      body: currentView,
       bottomNavigationBar: BottomNavigationBar(
         items: [
           const BottomNavigationBarItem(
@@ -107,8 +96,11 @@ class _HomePageState extends State<HomePage> {
             activeIcon: Icon(Icons.account_circle),
           ),
           BottomNavigationBarItem(
-            icon: _numUnreadConversations > 0 ? NumberBadge(number: _numUnreadConversations, child: const Icon(Icons.message_outlined))
-              : const Icon(Icons.message_outlined),
+            icon: _numUnreadConversations > 0
+                ? NumberBadge(
+                    number: _numUnreadConversations,
+                    child: const Icon(Icons.message_outlined))
+                : const Icon(Icons.message_outlined),
             label: 'Messages',
             activeIcon: const Icon(Icons.message),
           ),
@@ -126,9 +118,12 @@ class _HomePageState extends State<HomePage> {
 
   void _loadMatches() async {
     try {
-      _matches = await MatchService.instance.getMatches(RequestsService.instance);
+      _matchesFuture =
+          MatchService.instance.getMatches(RequestsService.instance);
+
+      final matches = await _matchesFuture;
       setState(() {
-        _numUnreadConversations = _matches!.fold(0, (p, e) {
+        _numUnreadConversations = matches.fold(0, (p, e) {
           if (e.numUnread > 0) return p + 1;
           return p;
         });
@@ -154,7 +149,8 @@ class _HomePageState extends State<HomePage> {
     if (!isLiked) return;
 
     try {
-      await ExploreService.instance.likeProfile(profile, RequestsService.instance);
+      await ExploreService.instance
+          .likeProfile(profile, RequestsService.instance);
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Error liking profile');
@@ -165,19 +161,8 @@ class _HomePageState extends State<HomePage> {
     Logger.info(runtimeType, 'Refreshing explore profiles');
     setState(() {
       _profilesLastRefresh = DateTime.now();
-      _profilesFuture = ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
+      _profilesFuture = ExploreService.instance.getPotentialMatches(
+          LocationService.instance, RequestsService.instance);
     });
-  }
-
-  void _unmatch(Match match) async {
-    try {
-      final matches = await MatchService.instance.unmatch(match.profile.uid, RequestsService.instance);
-      setState(() {
-        _matches = matches;
-      });
-    } on Exception catch (e) {
-      Logger.warnException(runtimeType, e);
-      textSnackbar(context, 'Error unmatching ${match.profile.name}');
-    }
   }
 }

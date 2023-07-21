@@ -14,10 +14,8 @@ const messageChunkSize = 10;
 
 class ChatPage extends StatefulWidget {
   final Profile profile;
-  final void Function(Message message) onMessage;
-  final void Function() onUnmatch;
 
-  const ChatPage(this.profile, {required this.onMessage, required this.onUnmatch, super.key});
+  const ChatPage(this.profile, {super.key});
 
   @override
   State<StatefulWidget> createState() => _ChatPageState();
@@ -37,7 +35,8 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     _textController = TextEditingController();
-    _pollTimer = Timer.periodic(const Duration(minutes: 1), (_) => _loadMessages());
+    _pollTimer =
+        Timer.periodic(const Duration(minutes: 1), (_) => _loadMessages());
   }
 
   @override
@@ -48,14 +47,17 @@ class _ChatPageState extends State<ChatPage> {
           InkWell(
             onTap: _openProfile,
             splashFactory: NoSplash.splashFactory,
-            child: CircleAvatar(backgroundImage: NetworkImage(widget.profile.photoUrls[0])),
+            child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.profile.photoUrls[0])),
           ),
           const SizedBox(width: 16),
           Text(widget.profile.name),
         ]),
         actions: [
           IconButton(
-            onPressed: () => showDialog(context: context, builder: (_) => ReportProfile(widget.profile)),
+            onPressed: () => showDialog(
+                context: context,
+                builder: (_) => ReportProfile(widget.profile)),
             icon: const Icon(Icons.flag, color: Colors.black38),
           ),
           IconButton(
@@ -71,11 +73,16 @@ class _ChatPageState extends State<ChatPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _messages?.isEmpty == true ? const Center(child: Text('No messages yet! Say something nice \u{2728}')) : ListView.builder(
-                reverse: true,
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                itemBuilder: _buildMessage,
-              )),
+              Expanded(
+                  child: _messages?.isEmpty == true
+                      ? const Center(
+                          child: Text(
+                              'No messages yet! Say something nice \u{2728}'))
+                      : ListView.builder(
+                          reverse: true,
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                          itemBuilder: _buildMessage,
+                        )),
               TextField(
                 controller: _textController,
                 decoration: InputDecoration(
@@ -84,7 +91,8 @@ class _ChatPageState extends State<ChatPage> {
                     onPressed: _sendMessage,
                     icon: const Icon(Icons.send, color: Colors.black38),
                   ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
@@ -106,7 +114,8 @@ class _ChatPageState extends State<ChatPage> {
   Widget? _buildMessage(BuildContext context, int index) {
     if (_messages != null && index >= _messages!.length && _loadedAll) {
       return null;
-    } else if ((_messages == null && index == 0) || index == _messages?.length) {
+    } else if ((_messages == null && index == 0) ||
+        index == _messages?.length) {
       return const Center(child: CircularProgressIndicator());
     } else if (_messages == null || index > _messages!.length) {
       _loadMessages();
@@ -120,11 +129,17 @@ class _ChatPageState extends State<ChatPage> {
     final EdgeInsets margin;
     if (message.isLocal) {
       alignment = Alignment.centerRight;
-      color = HSVColor.fromColor(theme.colorScheme.primary).withSaturation(0.2).withValue(0.9).toColor();
+      color = HSVColor.fromColor(theme.colorScheme.primary)
+          .withSaturation(0.2)
+          .withValue(0.9)
+          .toColor();
       margin = const EdgeInsets.fromLTRB(32, 4, 4, 4);
     } else {
       alignment = Alignment.centerLeft;
-      color = HSVColor.fromColor(theme.colorScheme.secondary).withSaturation(0.2).withValue(0.9).toColor();
+      color = HSVColor.fromColor(theme.colorScheme.secondary)
+          .withSaturation(0.2)
+          .withValue(0.9)
+          .toColor();
       margin = const EdgeInsets.fromLTRB(4, 4, 32, 4);
     }
 
@@ -178,15 +193,18 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _openProfile() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(
-      widget.profile,
-      currentPhoto: _profileCurrentPhoto,
-      isLiked: true,
-      onLike: null,
-      onPhotoChanged: (photo) => setState(() {
-        _profileCurrentPhoto = photo;
-      }),
-    )));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ProfilePage(
+                  widget.profile,
+                  currentPhoto: _profileCurrentPhoto,
+                  isLiked: true,
+                  onLike: null,
+                  onPhotoChanged: (photo) => setState(() {
+                    _profileCurrentPhoto = photo;
+                  }),
+                )));
   }
 
   void _sendMessage() async {
@@ -195,16 +213,15 @@ class _ChatPageState extends State<ChatPage> {
     _textController.text = '';
 
     try {
-      final message = await _matchService.sendMessage(widget.profile.uid, content, _requestsService);
+      final message = await _matchService.sendMessage(
+          widget.profile.uid, content, _requestsService);
       setState(() {
         if (_messages == null) {
-          _messages = [ message ];
+          _messages = [message];
         } else {
           _messages!.insert(0, message);
         }
       });
-
-      widget.onMessage(message);
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Failed to send message');
@@ -214,11 +231,19 @@ class _ChatPageState extends State<ChatPage> {
   void _unmatch() async {
     final confirm = await ConfirmationDialog(
       action: 'Unmatch',
-      detail: 'Are you sure you want to unmatch with ${widget.profile.name}? You will not longer be able to message with them. This cannot be undone.',
+      detail:
+          'Are you sure you want to unmatch with ${widget.profile.name}? You will not longer be able to message with them. This cannot be undone.',
     ).show(context);
 
     if (confirm) {
-      widget.onUnmatch();
+      try {
+        await MatchService.instance
+            .unmatch(widget.profile.uid, RequestsService.instance);
+      } on Exception catch (e) {
+        Logger.exception(runtimeType, e);
+        if (mounted) textSnackbar(context, 'Error unmatching user');
+      }
+
       if (mounted) Navigator.pop(context);
     }
   }
