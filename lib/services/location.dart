@@ -1,10 +1,13 @@
 import 'package:alchemy/logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as location_backend;
 import 'package:alchemy/data/location.dart';
 
 class LocationService {
+  static final LocationService instance = LocationService();
+
   bool get isInitialized => _isInitialized;
 
   final location_backend.Location _location = location_backend.Location();
@@ -32,6 +35,13 @@ class LocationService {
 
   Future<Location> getLocation() async {
     _checkInit();
+
+    if (kDebugMode) {
+      // Location doesn't work on iOS simulators, and
+      // is a bit of a pain to set up in Android emulators.
+      // So, if we're in debug mode, just return a preset location.
+      return Location(49.94081, -119.39454);
+    }
 
     final location = await _location.getLocation();
     Logger.debug(runtimeType, location.toString());
@@ -75,8 +85,6 @@ class LocationService {
     if (!_isEnabled) throw LocationServiceUnavailableException();
     if (_permissionStatus != location_backend.PermissionStatus.granted) throw LocationServicePermissionException();
   }
-
-  static final LocationService instance = LocationService();
 }
 
 abstract class LocationServiceException implements Exception {
