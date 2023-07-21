@@ -120,13 +120,7 @@ class RequestsService {
   }
 
   Uri _getUri(String endpoint, Map<String, dynamic>? urlParams) {
-      final Uri baseUri;
-      if (kDebugMode) {
-        baseUri = debugUri;
-      } else {
-        baseUri = liveUri;
-      }
-
+      final Uri baseUri = liveUri;
       return Uri(
         scheme: baseUri.scheme,
         host: baseUri.host,
