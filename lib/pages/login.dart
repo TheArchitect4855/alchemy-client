@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ]),
         const SizedBox(height: 16),
-        BigButton(text: 'NEXT', onPressed: _isBusy ? null : _logIn),
+        BigButton(text: 'NEXT', onPressed: (_isBusy || _phoneNumber == null) ? null : _logIn),
         _errorText == null
             ? const SizedBox(height: 20)
             : Text(_errorText!,

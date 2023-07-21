@@ -1,7 +1,7 @@
 import 'callingcode.dart';
 
-final phonePattern = RegExp(r'^\+(\d| )+$');
-final suffixPattern = RegExp(r'^(\d| )+$');
+final phonePattern = RegExp(r'^\+ *\d(\d| )*$');
+final suffixPattern = RegExp(r'^ *\d(\d| )*$');
 
 class PhoneNumber {
   final CallingCode callingCode;
