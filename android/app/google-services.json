@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "807536954475",
+    "project_id": "alchemy-17ab2",
+    "storage_bucket": "alchemy-17ab2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:807536954475:android:1e7563684a8f4b6d6e752e",
+        "android_client_info": {
+          "package_name": "app.usealchemy.alchemy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "807536954475-gfctn3ls5l2ejq84felf3tvmm23rbk64.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFKLAcESr7cLqImov-802BwrsF4Sbf9Yg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "807536954475-gfctn3ls5l2ejq84felf3tvmm23rbk64.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
