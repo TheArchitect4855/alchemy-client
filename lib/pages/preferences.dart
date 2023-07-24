@@ -5,6 +5,7 @@ import 'package:alchemy/gender_kind.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:alchemy/services/auth.dart';
+import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/preferences.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:alchemy/snackbar_util.dart';
@@ -34,26 +35,27 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Settings')),
-    body: FutureBuilder(
-      future: _preferencesFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          _preferences ??= snapshot.data!;
-          return _buildPreferences(context);
-        } else if (snapshot.hasError) {
-          if (snapshot.error is Exception) Logger.warnException(runtimeType, snapshot.error as Exception);
+        appBar: AppBar(title: const Text('Settings')),
+        body: FutureBuilder(
+          future: _preferencesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              _preferences ??= snapshot.data!;
+              return _buildPreferences(context);
+            } else if (snapshot.hasError) {
+              if (snapshot.error is Exception)
+                Logger.warnException(runtimeType, snapshot.error as Exception);
 
-          return Column(children: [
-            const Text('Error getting preferences:'),
-            Text(snapshot.error.toString()),
-          ]);
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
-    ),
-  );
+              return Column(children: [
+                const Text('Error getting preferences:'),
+                Text(snapshot.error.toString()),
+              ]);
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+      );
 
   Widget _buildPreferences(BuildContext context) {
     final theme = Theme.of(context);
@@ -66,11 +68,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
             children: [
               LabeledCheckbox(
                 label: const Text('Allow notifications'),
-                value: _preferences!.allowNotifications,
-                onChanged: (v) => setState(() {
-                  _preferences = _preferences!.copyWith(allowNotifications: v);
-                  _isDirty = true;
-                }),
+                value: _preferences!.allowNotifications &&
+                    NotificationsService.instance.isEnabled,
+                onChanged: _setAllowNotifications,
               ),
               LabeledCheckbox(
                 label: const Text('Show transgender people in my feed'),
@@ -87,10 +87,12 @@ class _PreferencesPageState extends State<PreferencesPage> {
                   'Non-Binary',
                   'Women',
                 ],
-                selected: _preferences!.genderInterests.map(parseGenderKind).toSet(),
+                selected:
+                    _preferences!.genderInterests.map(parseGenderKind).toSet(),
                 onChanged: (_, selected) => setState(() {
                   if (selected.isEmpty) return;
-                  _preferences = _preferences!.copyWith(genderInterests: selected.map(parseGenderName).toSet());
+                  _preferences = _preferences!.copyWith(
+                      genderInterests: selected.map(parseGenderName).toSet());
                   _isDirty = true;
                 }),
               ),
@@ -102,7 +104,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
               TextButton.icon(
                 onPressed: _deleteProfile,
                 style: ButtonStyle(
-                  foregroundColor: MaterialStatePropertyAll(theme.colorScheme.error),
+                  foregroundColor:
+                      MaterialStatePropertyAll(theme.colorScheme.error),
                 ),
                 icon: const Icon(Icons.delete_forever),
                 label: const Text('Delete Profile'),
@@ -125,7 +128,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
     final nav = Navigator.of(context);
     final confirm = await const ConfirmationDialog(
       action: 'Delete Profile',
-      detail: 'You will not appear in other people\'s explore feeds and all of your profile information will be lost. THIS CANNOT BE UNDONE.',
+      detail:
+          'You will not appear in other people\'s explore feeds and all of your profile information will be lost. THIS CANNOT BE UNDONE.',
       confirm: 'Delete my Profile',
     ).show(context);
 
@@ -133,7 +137,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
     try {
       await AuthService.instance.deleteProfile(_requestsService);
-      nav.pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const InitPage()), (route) => false);
+      nav.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const InitPage()),
+          (route) => false);
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       if (mounted) textSnackbar(context, 'Error deleting profile');
@@ -144,7 +150,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
     try {
       final nav = Navigator.of(context);
       await AuthService.instance.logout(_requestsService);
-      nav.pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const InitPage()), (route) => false);
+      nav.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const InitPage()),
+          (route) => false);
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       if (mounted) textSnackbar(context, 'Error logging out');
@@ -153,7 +161,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
   Future<void> _save() async {
     try {
-      if (_isDirty) await _preferencesService.setPreferences(_preferences!, _requestsService);
+      if (_isDirty) {
+        await _preferencesService.setPreferences(
+            _preferences!, _requestsService);
+      }
+
       setState(() {
         _isDirty = false;
       });
@@ -163,5 +175,18 @@ class _PreferencesPageState extends State<PreferencesPage> {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Error saving preferences');
     }
+  }
+
+  void _setAllowNotifications(bool value) async {
+    final notifications = NotificationsService.instance;
+    if (value && !notifications.isEnabled) {
+      await notifications.requestPermissions();
+    }
+
+    setState(() {
+      _preferences = _preferences!
+          .copyWith(allowNotifications: value && notifications.isEnabled);
+      _isDirty = true;
+    });
   }
 }
