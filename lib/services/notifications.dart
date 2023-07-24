@@ -1,5 +1,8 @@
 import 'package:alchemy/logger.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const notificationPromptKey = 'NOTIFICATIONS_PROMPT';
 
 class NotificationsService {
   static final NotificationsService instance = NotificationsService();
@@ -14,13 +17,15 @@ class NotificationsService {
   Future<void> initialize() async {
     if (_isInitialized) throw StateError('already initialized');
 
+    final prefs = await SharedPreferences.getInstance();
+    final shownPrompt = prefs.getBool(notificationPromptKey) ?? false;
+
     final settings = await _fbm.getNotificationSettings();
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
 
-    // TODO: Default seems to be "blocked" on Android, so check if this is
-    // first startup and request permission.
-    if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+    if (settings.authorizationStatus == AuthorizationStatus.notDetermined || !shownPrompt) {
       await requestPermissions();
+      if (!shownPrompt) await prefs.setBool(notificationPromptKey, true);
     } else {
       _isEnabled = _isStatusEnabled(settings.authorizationStatus);
     }
