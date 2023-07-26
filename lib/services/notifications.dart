@@ -12,6 +12,9 @@ class NotificationsService {
   bool get isInitialized => _isInitialized;
 
   final FirebaseMessaging _fbm = FirebaseMessaging.instance;
+  final List<void Function(RemoteMessage)> _onMessageListeners = [];
+  final List<void Function(RemoteMessage)> _onMessageOpenedAppListeners = [];
+  final List<RemoteMessage> _openAppMessages = [];
   bool _isEnabled = false;
   bool _isInitialized = false;
 
@@ -35,15 +38,22 @@ class NotificationsService {
       final token = await _fbm.getToken();
       if (token == null) {
         Logger.warn(runtimeType, 'FCM Token was null');
-      } else {
-        Logger.debug(runtimeType, 'FCM token: $token');
-        await requests.put(
-            '/messages/id',
-            {
-              'fcmToken': token,
-            },
-            (v) => v);
+        return;
       }
+
+      Logger.debug(runtimeType, 'FCM token: $token');
+      await requests.put(
+          '/messages/id',
+          {
+            'fcmToken': token,
+          },
+          (v) => v);
+
+      FirebaseMessaging.onMessage.listen((ev) => _onMessageListeners.forEach((el) => el(ev)));
+      FirebaseMessaging.onMessageOpenedApp.listen((ev) {
+        _openAppMessages.add(ev);
+        _onMessageOpenedAppListeners.forEach((el) => el(ev));
+      });
     }
 
     _isInitialized = true;
@@ -54,6 +64,15 @@ class NotificationsService {
     final settings = await _fbm.requestPermission();
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
     _isEnabled = _isStatusEnabled(settings.authorizationStatus);
+  }
+
+  void addOnMessageListener(void Function(RemoteMessage message) fn) => _onMessageListeners.add(fn);
+  void removeOnMessageListener(void Function(RemoteMessage message) fn) => _onMessageListeners.remove(fn);
+  void removeOnMessageOpenedAppListener(void Function(RemoteMessage message) fn) => _onMessageOpenedAppListeners.remove(fn);
+
+  void addOnMessageOpenedAppListener(void Function(RemoteMessage message) fn) {
+    _openAppMessages.forEach(fn);
+    _onMessageOpenedAppListeners.add(fn);
   }
 
   static bool _isStatusEnabled(AuthorizationStatus status) {
