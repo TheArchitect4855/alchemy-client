@@ -120,14 +120,14 @@ class RequestsService {
   }
 
   Uri _getUri(String endpoint, Map<String, dynamic>? urlParams) {
-      final Uri baseUri = liveUri;
-      return Uri(
-        scheme: baseUri.scheme,
-        host: baseUri.host,
-        port: baseUri.port,
-        path: endpoint,
-        queryParameters: urlParams,
-      );
+    final Uri baseUri = liveUri;
+    return Uri(
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      port: baseUri.port,
+      path: endpoint,
+      queryParameters: urlParams,
+    );
   }
 
   Future<String> _getUserAgent() async {

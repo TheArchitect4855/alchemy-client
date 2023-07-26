@@ -1,4 +1,5 @@
 import 'package:alchemy/logger.dart';
+import 'package:alchemy/services/requests.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +15,7 @@ class NotificationsService {
   bool _isEnabled = false;
   bool _isInitialized = false;
 
-  Future<void> initialize() async {
+  Future<void> initialize(RequestsService requests) async {
     if (_isInitialized) throw StateError('already initialized');
 
     final prefs = await SharedPreferences.getInstance();
@@ -28,6 +29,21 @@ class NotificationsService {
       if (!shownPrompt) await prefs.setBool(notificationPromptKey, true);
     } else {
       _isEnabled = _isStatusEnabled(settings.authorizationStatus);
+    }
+
+    if (_isEnabled) {
+      final token = await _fbm.getToken();
+      if (token == null) {
+        Logger.warn(runtimeType, 'FCM Token was null');
+      } else {
+        Logger.debug(runtimeType, 'FCM token: $token');
+        await requests.put(
+            '/messages/id',
+            {
+              'fcmToken': token,
+            },
+            (v) => v);
+      }
     }
 
     _isInitialized = true;

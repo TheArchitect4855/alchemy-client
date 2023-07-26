@@ -120,7 +120,7 @@ class _InitPageState extends State<InitPage> {
 
     try {
       final notifications = NotificationsService.instance;
-      if (!notifications.isInitialized) await notifications.initialize();
+      if (!notifications.isInitialized) await notifications.initialize(RequestsService.instance);
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);
       replaceRoute(context, ErrorPage(message: e.toString()));
