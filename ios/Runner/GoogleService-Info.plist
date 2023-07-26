@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>807536954475-l6e4j1919iv2a1l5ndkmogpr2fs6a65v.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.807536954475-l6e4j1919iv2a1l5ndkmogpr2fs6a65v</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAmJENdBxQcMF-AiDJKH_a4Noz7P_yViV8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>807536954475</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>app.usealchemy.alchemy</string>
+	<key>PROJECT_ID</key>
+	<string>alchemy-17ab2</string>
+	<key>STORAGE_BUCKET</key>
+	<string>alchemy-17ab2.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:807536954475:ios:b6b75e32b7976d096e752e</string>
+</dict>
+</plist>

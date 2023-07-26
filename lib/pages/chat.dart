@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:alchemy/components/confirmationdialog.dart';
 import 'package:alchemy/components/report_profile.dart';
 import 'package:alchemy/data/message.dart';
@@ -6,8 +5,10 @@ import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/profile.dart';
 import 'package:alchemy/services/match.dart';
+import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:alchemy/snackbar_util.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 const messageChunkSize = 10;
@@ -23,7 +24,6 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late final TextEditingController _textController;
-  late final Timer _pollTimer;
   final MatchService _matchService = MatchService.instance;
   final RequestsService _requestsService = RequestsService.instance;
   int _profileCurrentPhoto = 0;
@@ -34,9 +34,8 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    NotificationsService.instance.addOnMessageListener(_onMessage);
     _textController = TextEditingController();
-    _pollTimer =
-        Timer.periodic(const Duration(minutes: 1), (_) => _loadMessages());
   }
 
   @override
@@ -106,8 +105,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    NotificationsService.instance.removeOnMessageListener(_onMessage);
     _textController.dispose();
-    _pollTimer.cancel();
     super.dispose();
   }
 
@@ -189,6 +188,20 @@ class _ChatPageState extends State<ChatPage> {
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Failed to load messages');
+    }
+  }
+
+  void _onMessage(RemoteMessage message) async {
+    Logger.debug(runtimeType, 'on message: ${message.data}');
+    if (message.data['kind'] == 'match-message' && message.data['sender'] == widget.profile.uid) {
+      final m = Message(int.parse(message.data['id']), 1, message.data['content'], DateTime.parse(message.data['sentAt']));
+      setState(() {
+        if (_messages == null) {
+          _messages = [m];
+        } else {
+          _messages!.insert(0, m);
+        }
+      });
     }
   }
 

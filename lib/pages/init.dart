@@ -12,6 +12,7 @@ import 'package:alchemy/pages/signup/tos.dart';
 import 'package:alchemy/pages/unavailable.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/location.dart';
+import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/routing.dart';
@@ -35,7 +36,7 @@ class _InitPageState extends State<InitPage> {
     final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(color: theme.colorScheme.background),
-      child: const Center(child:  CircularProgressIndicator()),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -72,7 +73,8 @@ class _InitPageState extends State<InitPage> {
       return;
     }
 
-    if (authService.contact != null && (authService.contact!.isRedlisted || authService.contact!.age < 18)) {
+    if (authService.contact != null &&
+        (authService.contact!.isRedlisted || authService.contact!.age < 18)) {
       replaceRoute(context, const RedlistedPage());
       return;
     }
@@ -81,7 +83,8 @@ class _InitPageState extends State<InitPage> {
     try {
       if (!locationService.isInitialized) await locationService.initialize();
 
-      bool isAvailable = await authService.isAppAvailableInArea(locationService, requestsService);
+      bool isAvailable = await authService.isAppAvailableInArea(
+          locationService, requestsService);
       if (!isAvailable) {
         replaceRoute(context, const UnavailablePage());
         return;
@@ -113,6 +116,14 @@ class _InitPageState extends State<InitPage> {
     if (!authService.contact!.tosAgreed) {
       replaceRoute(context, const SignupTosPage());
       return;
+    }
+
+    try {
+      final notifications = NotificationsService.instance;
+      if (!notifications.isInitialized) await notifications.initialize(RequestsService.instance);
+    } on Exception catch (e) {
+      Logger.exception(runtimeType, e);
+      replaceRoute(context, ErrorPage(message: e.toString()));
     }
 
     replaceRoute(context, const HomePage());

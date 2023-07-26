@@ -8,8 +8,10 @@ import 'package:alchemy/pages/preferences.dart';
 import 'package:alchemy/services/explore.dart';
 import 'package:alchemy/services/location.dart';
 import 'package:alchemy/services/match.dart';
+import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:alchemy/snackbar_util.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/data/match.dart';
 
@@ -33,6 +35,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    NotificationsService.instance.addOnMessageListener(_onMessage);
+    NotificationsService.instance.addOnMessageOpenedAppListener(_onMessageOpenedApp);
     _profilesFuture = ExploreService.instance.getPotentialMatches(
         LocationService.instance, RequestsService.instance);
     _profilesLastRefresh = DateTime.now();
@@ -116,6 +120,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  @override
+  void dispose() {
+    NotificationsService.instance.removeOnMessageListener(_onMessage);
+    NotificationsService.instance.removeOnMessageOpenedAppListener(_onMessageOpenedApp);
+    super.dispose();
+  }
+
   void _loadMatches() async {
     try {
       _matchesFuture =
@@ -138,6 +149,22 @@ class _HomePageState extends State<HomePage> {
       _loadMatches();
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);
+    }
+  }
+
+  void _onMessage(RemoteMessage message) {
+    if (message.data['kind'] == 'match-message') {
+      _loadMatches();
+    }
+  }
+
+  void _onMessageOpenedApp(RemoteMessage message) {
+    Logger.debug(runtimeType, 'on message opened app: ${message.data}');
+    if (message.data['kind'] == 'match-message') {
+      _loadMatches();
+      setState(() {
+        _currentIndex = 2;
+      });
     }
   }
 
