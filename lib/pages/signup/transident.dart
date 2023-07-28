@@ -47,7 +47,10 @@ class _SignupTransgenderSelfIdentificationPageState extends State<SignupTransgen
         ),
         TextButton(
           child: const Text('View Alchemy\'s Privacy Policy'),
-          onPressed: () => launchUrl(Uri.parse('https://usealchemy.app/legal/privacy')),
+          onPressed: () => launchUrl(
+            Uri.parse('https://usealchemy.app/legal/privacy'),
+            mode: LaunchMode.externalApplication,
+          ),
         ),
       ],
     );
