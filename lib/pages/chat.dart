@@ -178,12 +178,7 @@ class _ChatPageState extends State<ChatPage> {
         }
 
         _messages!.addAll(messages);
-        final oldest = messages.last.id;
-        if (_oldest == null || oldest < _oldest!) {
-          _oldest = oldest;
-        } else if (oldest >= _oldest!) {
-          _loadedAll = true;
-        }
+        _oldest = messages.last.id;
       });
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);
