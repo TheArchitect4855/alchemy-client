@@ -87,6 +87,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     return Stack(alignment: Alignment.bottomCenter, children: [
       ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
@@ -283,6 +284,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _saveProfile() async {
+    // Hide keyboard
+    FocusManager.instance.primaryFocus?.unfocus();
+
     final String gender;
     switch (_genderKind) {
       case GenderKind.man:

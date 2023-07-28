@@ -34,7 +34,11 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    NotificationsService.instance.addOnMessageListener(_onMessage);
+
+    final notifications = NotificationsService.instance;
+    notifications.addOnMessageListener(_onMessage);
+    if (notifications.isEnabled) notifications.updateToken(RequestsService.instance);
+
     _textController = TextEditingController();
   }
 
@@ -178,12 +182,7 @@ class _ChatPageState extends State<ChatPage> {
         }
 
         _messages!.addAll(messages);
-        final oldest = messages.last.id;
-        if (_oldest == null || oldest < _oldest!) {
-          _oldest = oldest;
-        } else if (oldest >= _oldest!) {
-          _loadedAll = true;
-        }
+        _oldest = messages.last.id;
       });
     } on Exception catch (e) {
       Logger.warnException(runtimeType, e);

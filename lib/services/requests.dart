@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart';
 
-const timeout = Duration(seconds: 20);
+const timeout = Duration(minutes: 1);
 final debugUri = Uri(
     scheme: 'http',
     host: '10.0.2.2',
