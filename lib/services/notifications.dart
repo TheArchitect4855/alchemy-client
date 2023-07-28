@@ -35,20 +35,7 @@ class NotificationsService {
     }
 
     if (_isEnabled) {
-      final token = await _fbm.getToken();
-      if (token == null) {
-        Logger.warn(runtimeType, 'FCM Token was null');
-        return;
-      }
-
-      Logger.debug(runtimeType, 'FCM token: $token');
-      await requests.put(
-          '/messages/id',
-          {
-            'fcmToken': token,
-          },
-          (v) => v);
-
+      await updateToken(requests);
       FirebaseMessaging.onMessage.listen((ev) => _onMessageListeners.forEach((el) => el(ev)));
       FirebaseMessaging.onMessageOpenedApp.listen((ev) {
         _openAppMessages.add(ev);
@@ -64,6 +51,23 @@ class NotificationsService {
     final settings = await _fbm.requestPermission();
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
     _isEnabled = _isStatusEnabled(settings.authorizationStatus);
+  }
+
+  Future<void> updateToken(RequestsService requests) async {
+    if (!_isEnabled) throw StateError('not enabled');
+    final token = await _fbm.getToken();
+    if (token == null) {
+      Logger.warn(runtimeType, 'FCM Token was null');
+      return;
+    }
+
+    Logger.debug(runtimeType, 'FCM token: $token');
+    await requests.put(
+        '/messages/id',
+        {
+          'fcmToken': token,
+        },
+        (v) => v);
   }
 
   void addOnMessageListener(void Function(RemoteMessage message) fn) => _onMessageListeners.add(fn);

@@ -34,7 +34,11 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    NotificationsService.instance.addOnMessageListener(_onMessage);
+
+    final notifications = NotificationsService.instance;
+    notifications.addOnMessageListener(_onMessage);
+    if (notifications.isEnabled) notifications.updateToken(RequestsService.instance);
+
     _textController = TextEditingController();
   }
 
