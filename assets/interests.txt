@@ -1,15 +1,51 @@
-Cooking
-Lego
-Computers
-Gaming
-Art
-DIY
-Hiking
-K-Pop
-Music
-Dancing
-Reading
-Travel
-Driving
+Activism
+Animals
+Botany
 Camping
-Water Sports
+Collectibles
+Computers
+Conspiracies
+Cooking
+Dance
+Ecology
+Engines & Machinery
+Environmentalism
+Fashion
+Fine Art
+Fishing
+Health & Fitness
+Hiking
+Ancient History
+Military History
+Modern History
+Hunting
+Indoor Gardening
+Kayaking
+Knitting & Crocheting
+Languages
+Movies
+Music
+Organizing
+Outdoor Gardening
+Painting & Drawing
+Performance Art
+Photography
+Politics
+Pop Culture
+Psychology
+Reading
+Robotics
+Rock Climbing
+Rotating Hyper-Fixations
+Sculpting & Carving
+Space
+Mainstream Sports
+Niche Sports
+STEM
+Technology & AI
+Trains & Planes & Automobiles
+Travelling
+True Crime
+Urban Nature
+Video Games
+Writing
