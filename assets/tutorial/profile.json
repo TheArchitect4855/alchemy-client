@@ -1,0 +1,23 @@
+{
+	"uid": "tutorial-profile",
+	"name": "Nanami",
+	"age": 28,
+	"bio": "I apologise for my friend in the last picture.\nI hate small talk, so if you match with me don't ask about the weather.",
+	"gender": "man",
+	"photoUrls": [
+		"https://api.kurtisknodel.workers.dev/photos?key=tutorial-profile-1.jpg",
+		"https://api.kurtisknodel.workers.dev/photos?key=tutorial-profile-2.jpg",
+		"https://api.kurtisknodel.workers.dev/photos?key=tutorial-profile-3.jpg"
+	],
+	"relationshipInterests": [
+		"romance"
+	],
+	"neurodiversities": [
+		"ASD"
+	],
+	"interests": [
+		"Jujutsu", "Swordsmanship", "MMA", "Military History"
+	],
+	"city": "Tokyo",
+	"pronouns": null
+}

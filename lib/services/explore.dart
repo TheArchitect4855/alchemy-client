@@ -26,7 +26,7 @@ class ExploreService {
         {
           'target': profile.uid,
         },
-        (v) => v['match'] as Map<String, dynamic>);
+        (v) => v['match'] as Map<String, dynamic>?);
 
     return match == null ? null : Match.fromJson(match);
   }

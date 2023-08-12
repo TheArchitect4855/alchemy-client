@@ -9,6 +9,7 @@ import 'package:alchemy/pages/redlisted.dart';
 import 'package:alchemy/pages/signup/intake.dart';
 import 'package:alchemy/pages/signup/photos.dart';
 import 'package:alchemy/pages/signup/tos.dart';
+import 'package:alchemy/pages/tutorial.dart';
 import 'package:alchemy/pages/unavailable.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/location.dart';
@@ -16,6 +17,7 @@ import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/routing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key});
@@ -118,12 +120,20 @@ class _InitPageState extends State<InitPage> {
       return;
     }
 
+    final prefs = await SharedPreferences.getInstance();
+    final isTutorialCompleted = prefs.getBool(tutorialStatusKey) ?? false;
+    if (!isTutorialCompleted) {
+      replaceRoute(context, const TutorialPage());
+      return;
+    }
+
     try {
       final notifications = NotificationsService.instance;
       if (!notifications.isInitialized) await notifications.initialize(RequestsService.instance);
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);
       replaceRoute(context, ErrorPage(message: e.toString()));
+      return;
     }
 
     replaceRoute(context, const HomePage());

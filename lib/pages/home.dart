@@ -1,4 +1,4 @@
-import 'package:alchemy/components/number_badge.dart';
+import 'package:alchemy/components/home_scaffold.dart';
 import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/edit_profile.dart';
@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
   late DateTime _profilesLastRefresh;
   late Future<List<Match>> _matchesFuture;
   int _currentIndex = 0;
-  int _currentProfile = 0;
   int _numUnreadConversations = 0;
 
   @override
@@ -45,14 +44,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     Widget currentView;
     switch (_currentIndex) {
       case 0:
         currentView = ExplorePage(
           profilesFuture: _profilesFuture,
-          currentProfile: _currentProfile,
-          popProfile: _onPopProfile,
+          onPopProfile: _onPopProfile,
         );
         break;
       case 1:
@@ -68,55 +65,16 @@ class _HomePageState extends State<HomePage> {
         throw UnimplementedError();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Image.asset('assets/icon-crop.png'),
-        ),
-        title: Text('alchemy',
-            style: theme.textTheme.titleLarge!
-                .apply(color: theme.colorScheme.primary)),
-        actions: [
-          IconButton(
-            color: Colors.black38,
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const PreferencesPage())),
-            icon: const Icon(Icons.settings),
-          ),
-        ],
-      ),
+    return HomeScaffold(
       body: currentView,
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            label: 'Explore',
-            activeIcon: Icon(Icons.explore),
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined),
-            label: 'Profile',
-            activeIcon: Icon(Icons.account_circle),
-          ),
-          BottomNavigationBarItem(
-            icon: _numUnreadConversations > 0
-                ? NumberBadge(
-                    number: _numUnreadConversations,
-                    child: const Icon(Icons.message_outlined))
-                : const Icon(Icons.message_outlined),
-            label: 'Messages',
-            activeIcon: const Icon(Icons.message),
-          ),
-        ],
-        onTap: (v) => setState(() {
+      currentIndex: _currentIndex,
+      messageNotificationBadge: _numUnreadConversations,
+      onNavTapped: (v) => setState(() {
           final elapsed = DateTime.now().difference(_profilesLastRefresh);
           if (elapsed.inMinutes > 5) _refreshProfiles();
           _currentIndex = v;
-        }),
-        currentIndex: _currentIndex,
-        useLegacyColorScheme: false,
-      ),
+      }),
+      onSettingsPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PreferencesPage())),
     );
   }
 
@@ -169,10 +127,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onPopProfile(Profile profile, bool isLiked) async {
-    setState(() {
-      _currentProfile += 1;
-    });
-
     if (!isLiked) return;
 
     try {

@@ -1,0 +1,32 @@
+[intro]
+Welcome to Alchemy, the dating app for neurodiverse people!
+
+This is a short tutorial that will get you started with the
+app.
+
+(tap the screen to continue)
+
+[photos-1]
+Tap the right side of someone's profile to see their photos!
+
+[photos-2]
+Then tap the left side to go back!
+
+[info-1]
+Tap here to learn more about your potential match!
+
+[info-2]
+Once you're done, tap here to go back!
+
+[like]
+Tap the like button to show them you're interested!
+
+[swipe]
+Finally, swipe up to see the next profile...
+
+[outro]
+That's it!
+
+Stay safe, and have fun!
+
+(tap the screen to continue)
