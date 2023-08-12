@@ -38,7 +38,8 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodyMedium!;
+    final theme = Theme.of(context);
+    final style = theme.textTheme.bodyLarge!.apply(color: theme.colorScheme.secondary);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -60,10 +61,10 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
           ),
         ),
         Positioned(
-          top: _backButtonPosition.dy - 12,
-          left: 32,
-          width: _backButtonPosition.dx + 64,
-          child: FloatingText(widget.data.dialogue['info-2']!, style, TextAlign.right),
+          top: _backButtonPosition.dy - 16,
+          left: 16,
+          right: 24,
+          child: Text(widget.data.dialogue['info-2']!, style: style, textAlign: TextAlign.right),
         ),
       ],
     );

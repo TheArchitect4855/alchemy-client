@@ -118,7 +118,7 @@ class _TutorialPageState extends State<TutorialPage> {
       onSettingsPressed: null,
     );
 
-    final style = theme.textTheme.bodyMedium!.apply(color: Colors.white);
+    final style = theme.textTheme.bodyLarge!.apply(color: Colors.white);
     final List<Widget> stack;
     switch (_state) {
       case _TutorialState.intro:
