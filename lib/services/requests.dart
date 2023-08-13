@@ -12,7 +12,7 @@ final debugUri = Uri(
     host: '10.0.2.2',
     port:
         8787); // 10.0.2.2 is "loopback on the host machine" for Android emulators
-final liveUri = Uri(scheme: 'https', host: 'api.kurtisknodel.workers.dev');
+final liveUri = Uri(scheme: 'https', host: 'api.usealchemy.app');
 
 class RequestsService {
   static final RequestsService instance = RequestsService();
