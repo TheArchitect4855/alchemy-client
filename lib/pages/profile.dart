@@ -11,9 +11,11 @@ class ProfilePage extends StatefulWidget {
   final int currentPhoto;
   final bool isLiked;
   final void Function(int photo) onPhotoChanged;
+  final Key? backButtonKey;
   final void Function(bool isLiked)? onLike;
 
-  const ProfilePage(this.profile, {required this.currentPhoto, required this.isLiked, required this.onLike, required this.onPhotoChanged, super.key});
+  const ProfilePage(this.profile,
+      {required this.currentPhoto, required this.isLiked, required this.onLike, required this.onPhotoChanged, this.backButtonKey, super.key});
 
   @override
   State<StatefulWidget> createState() => _ProfilePageState();
@@ -47,6 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(width: 16),
             Text(widget.profile.city, style: theme.textTheme.labelMedium),
             IconButton(
+                  key: widget.backButtonKey,
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.arrow_circle_down, size: 18, color: Colors.black45),
             ),

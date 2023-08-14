@@ -9,6 +9,7 @@ import 'package:alchemy/pages/redlisted.dart';
 import 'package:alchemy/pages/signup/intake.dart';
 import 'package:alchemy/pages/signup/photos.dart';
 import 'package:alchemy/pages/signup/tos.dart';
+import 'package:alchemy/pages/tutorial.dart';
 import 'package:alchemy/pages/unavailable.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/location.dart';
@@ -16,6 +17,7 @@ import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/routing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key});
@@ -116,6 +118,13 @@ class _InitPageState extends State<InitPage> {
 
     if (!authService.contact!.tosAgreed) {
       replaceRoute(context, const SignupTosPage());
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final isTutorialCompleted = prefs.getBool(tutorialStatusKey) ?? false;
+    if (!isTutorialCompleted) {
+      replaceRoute(context, const TutorialPage());
       return;
     }
 

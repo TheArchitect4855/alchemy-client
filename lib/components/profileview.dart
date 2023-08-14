@@ -9,6 +9,8 @@ class ProfileView extends StatelessWidget {
   final Profile profile;
   final bool isLiked;
   final int currentPhoto;
+  final Key? infoButtonKey;
+  final Key? likeButtonKey;
   final void Function()? onPressDetails;
   final void Function(bool value)? onLike;
   final void Function(int value)? onPhotoChanged;
@@ -19,6 +21,8 @@ class ProfileView extends StatelessWidget {
     required this.onPressDetails,
     required this.onLike,
     required this.onPhotoChanged,
+      this.infoButtonKey,
+      this.likeButtonKey,
     super.key
   });
 
@@ -73,18 +77,20 @@ class ProfileView extends StatelessWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: onPressDetails,
-                  icon: const Icon(Icons.info_outline, size: 18, color: Colors.white),
-                ),
-                Expanded(child: Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    alignment: Alignment.centerRight,
-                    onPressed: onLike == null ? null : () => onLike!(!isLiked),
-                    icon: Icon(Icons.favorite, size: 48, color: isLiked ? Colors.red : Colors.white),
-                  ),
-                )),
+                    Expanded(
+                        child: Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        alignment: Alignment.centerRight,
+                        onPressed: onPressDetails,
+                        icon: Icon(Icons.info_outline, size: 18, color: Colors.white, key: infoButtonKey),
+                      ),
+                    )),
+                    IconButton(
+                      key: likeButtonKey,
+                      onPressed: onLike == null ? null : () => onLike!(!isLiked),
+                      icon: Icon(Icons.favorite, size: 48, color: isLiked ? Colors.red : Colors.white),
+                    ),
               ],
             ),
             Wrap(

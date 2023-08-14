@@ -88,6 +88,7 @@ flutter:
   assets:
     - assets/
     - assets/flags/
+    - assets/tutorial/
 
   fonts:
     - family: Lexend

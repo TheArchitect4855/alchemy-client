@@ -1,0 +1,23 @@
+{
+	"uid": "tutorial-profile",
+	"name": "Ken",
+	"age": 23,
+	"bio": "i work at beach\nLast pic is me at a beach-off",
+	"gender": "man",
+	"photoUrls": [
+		"https://api.kurtisknodel.workers.dev/photos?key=tutorial-profile-1.png",
+		"https://api.kurtisknodel.workers.dev/photos?key=tutorial-profile-2.png"
+	],
+	"relationshipInterests": [
+		"romance"
+	],
+	"neurodiversities": [],
+	"interests": [
+		"Health & Fitness",
+		"Movies",
+		"Mainstream Sports",
+		"Video Games"
+	],
+	"city": "Beach City",
+	"pronouns": null
+}
