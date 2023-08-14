@@ -26,10 +26,15 @@ class LocationService {
     }
 
     _permissionStatus = await _location.hasPermission();
-    if (_permissionStatus == location_backend.PermissionStatus.deniedForever) throw LocationServicePermissionException();
+    if (_permissionStatus == location_backend.PermissionStatus.deniedForever) {
+      throw LocationServicePermissionException();
+    }
+
     if (_permissionStatus == location_backend.PermissionStatus.denied) {
       _permissionStatus = await _location.requestPermission();
-      if (_permissionStatus != location_backend.PermissionStatus.granted) throw LocationServicePermissionException();
+      if (_permissionStatus != location_backend.PermissionStatus.granted) {
+        throw LocationServicePermissionException();
+      }
     }
   }
 
@@ -43,9 +48,14 @@ class LocationService {
       return Location(49.94081, -119.39454);
     }
 
-    final location = await _location.getLocation();
+    final location = await _location.getLocation().timeout(
+        const Duration(minutes: 1),
+        onTimeout: () => throw LocationServiceUnavailableException());
+
     Logger.debug(runtimeType, location.toString());
-    if (location.latitude == null || location.longitude == null) throw LocationServiceInvalidException('latitude/longitude');
+    if (location.latitude == null || location.longitude == null) {
+      throw LocationServiceInvalidException('latitude/longitude');
+    }
 
     return Location(location.latitude!, location.longitude!);
   }
@@ -59,7 +69,8 @@ class LocationService {
     _checkInit();
 
     try {
-      final placemarks = await geocoding.placemarkFromCoordinates(location.latitude, location.longitude);
+      final placemarks = await geocoding.placemarkFromCoordinates(
+          location.latitude, location.longitude);
       if (placemarks.isEmpty) return null;
       return placemarks[0];
     } on PlatformException catch (e) {
@@ -76,14 +87,21 @@ class LocationService {
     if (!_isEnabled) _isEnabled = await _location.requestService();
     if (!_isEnabled) throw LocationServiceUnavailableException();
 
-    if (_permissionStatus != location_backend.PermissionStatus.granted) _permissionStatus = await _location.requestPermission();
-    if (_permissionStatus != location_backend.PermissionStatus.granted) throw LocationServicePermissionException();
+    if (_permissionStatus != location_backend.PermissionStatus.granted) {
+      _permissionStatus = await _location.requestPermission();
+    }
+
+    if (_permissionStatus != location_backend.PermissionStatus.granted) {
+      throw LocationServicePermissionException();
+    }
   }
 
   void _checkInit() {
     if (!_isInitialized) throw StateError('not initialized');
     if (!_isEnabled) throw LocationServiceUnavailableException();
-    if (_permissionStatus != location_backend.PermissionStatus.granted) throw LocationServicePermissionException();
+    if (_permissionStatus != location_backend.PermissionStatus.granted) {
+      throw LocationServicePermissionException();
+    }
   }
 }
 
@@ -102,13 +120,16 @@ class LocationServiceGeocodingException extends LocationServiceException {
 }
 
 class LocationServiceInvalidException extends LocationServiceException {
-  LocationServiceInvalidException(String property) : super('location had invalid $property');
+  LocationServiceInvalidException(String property)
+      : super('location had invalid $property');
 }
 
 class LocationServicePermissionException extends LocationServiceException {
-  LocationServicePermissionException() : super('location service permission was denied');
+  LocationServicePermissionException()
+      : super('location service permission was denied');
 }
 
 class LocationServiceUnavailableException extends LocationServiceException {
-  LocationServiceUnavailableException() : super('location service is unavailable');
+  LocationServiceUnavailableException()
+      : super('location service is unavailable');
 }
