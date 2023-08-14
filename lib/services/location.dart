@@ -50,7 +50,7 @@ class LocationService {
 
     final location = await _location.getLocation().timeout(
         const Duration(minutes: 1),
-        onTimeout: () => throw LocationServiceUnavailableException());
+        onTimeout: () => throw LocationServiceTimeoutException());
 
     Logger.debug(runtimeType, location.toString());
     if (location.latitude == null || location.longitude == null) {
@@ -127,6 +127,10 @@ class LocationServiceInvalidException extends LocationServiceException {
 class LocationServicePermissionException extends LocationServiceException {
   LocationServicePermissionException()
       : super('location service permission was denied');
+}
+
+class LocationServiceTimeoutException extends LocationServiceException {
+  LocationServiceTimeoutException() : super('location service timed out');
 }
 
 class LocationServiceUnavailableException extends LocationServiceException {

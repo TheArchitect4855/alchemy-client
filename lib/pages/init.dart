@@ -5,6 +5,7 @@ import 'package:alchemy/pages/home.dart';
 import 'package:alchemy/pages/login.dart';
 import 'package:alchemy/pages/locationrequest.dart';
 import 'package:alchemy/pages/noconnection.dart';
+import 'package:alchemy/pages/nolocation.dart';
 import 'package:alchemy/pages/redlisted.dart';
 import 'package:alchemy/pages/signup/intake.dart';
 import 'package:alchemy/pages/signup/photos.dart';
@@ -95,6 +96,10 @@ class _InitPageState extends State<InitPage> {
     } on LocationServiceInvalidException catch (e) {
       Logger.exception(runtimeType, e);
       replaceRoute(context, ErrorPage(message: e.message));
+      return;
+    } on LocationServiceTimeoutException catch (e) {
+      Logger.warnException(runtimeType, e);
+      replaceRoute(context, NoLocationPage());
       return;
     } on LocationServiceException {
       replaceRoute(context, const LocationRequestPage());
