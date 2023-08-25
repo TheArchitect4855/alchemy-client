@@ -1,11 +1,11 @@
 {
-    "name": "alchemy",
-    "short_name": "alchemy",
+    "name": "Alchemy",
+    "short_name": "Alchemy",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Alchemy: Neurodiverse Dating",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

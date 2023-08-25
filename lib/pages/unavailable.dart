@@ -4,6 +4,7 @@ import 'package:alchemy/logger.dart';
 import 'package:alchemy/services/location.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:alchemy/snackbar_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -13,14 +14,25 @@ class UnavailablePage extends StatelessWidget {
   const UnavailablePage({super.key});
 
   @override
-  Widget build(BuildContext context) => BottomCard(
-    title: 'Unavailable',
-    children: [
-      const Text('Alchemy is not yet available in your area. If you\'d like, you can join the waiting list and we\'ll notify you once the app is available.'),
-      const SizedBox(height: 16),
-      BigButton(text: 'Join the Waiting List', onPressed: () => _joinWaitingList(context)),
-    ],
-  );
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return const BottomCard(
+        title: 'Unavailable',
+        children: [
+          Text('Alchemy is not yet available in your area.'),
+        ],
+      );
+    }
+
+    return BottomCard(
+      title: 'Unavailable',
+      children: [
+        const Text('Alchemy is not yet available in your area. If you\'d like, you can join the waiting list and we\'ll notify you once the app is available.'),
+        const SizedBox(height: 16),
+        BigButton(text: 'Join the Waiting List', onPressed: () => _joinWaitingList(context)),
+      ],
+    );
+  }
 
   void _joinWaitingList(BuildContext context) async {
     try {

@@ -21,7 +21,9 @@ enum LogLevel {
 
 class Logger {
   static LogLevel level = kDebugMode ? LogLevel.debug : LogLevel.warn;
-  static final _logFile = getApplicationDocumentsDirectory().then((v) =>
+  static final _logFile = kIsWeb
+      ? null
+      : getApplicationDocumentsDirectory().then((v) =>
       File('${v.path}/${DateTime.now().toIso8601String()}.log')
           .openWrite(mode: FileMode.append));
 
@@ -109,7 +111,8 @@ class Logger {
     final timestamp = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
     final tag = level.name.toUpperCase();
 
-    if (kDebugMode) print('[$tag $timestamp] $context: $message');
+    if (kDebugMode || _logFile == null) print('[$tag $timestamp] $context: $message');
+    if (_logFile == null) return;
 
     try {
       final sink = await _logFile;
@@ -120,7 +123,7 @@ class Logger {
         'timestamp': now.toIso8601String(),
       });
 
-      sink.writeln(logJson);
+      sink!.writeln(logJson);
     } on Exception catch (e) {
       if (kDebugMode) print('!!!FAILED WRITING TO LOG FILE!!!\n$e');
     }
