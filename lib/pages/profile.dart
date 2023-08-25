@@ -36,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) => Scaffold(
     body: LayoutBuilder(builder: (context, constraints) {
       final theme = Theme.of(context);
-      final imageSize = constraints.maxWidth;
+      final imageSize = min(constraints.maxWidth, constraints.maxHeight * 0.6);
       final photoUrls = widget.profile.photoUrls;
       final currentPhotoUrl = photoUrls.isEmpty ? null : photoUrls[_currentPhoto];
 
@@ -121,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       stackElements.add(Positioned(
         bottom: 8,
-        width: imageSize,
+        width: constraints.maxWidth,
         child: _buildPhotoDots(theme),
       ));
 
