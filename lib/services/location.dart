@@ -19,19 +19,27 @@ class LocationService {
     if (_isInitialized) throw StateError('already initialized');
     _isInitialized = true;
 
+    Logger.debug(runtimeType, 'Initialize...');
     _isEnabled = await _location.serviceEnabled();
+    Logger.debug(runtimeType, 'Enabled: $_isEnabled');
     if (!_isEnabled) {
+      Logger.debug(runtimeType, 'Requesting location service...');
       _isEnabled = await _location.requestService();
+      Logger.debug(runtimeType, 'Service requested. Enabled: $_isEnabled');
       if (!_isEnabled) throw LocationServiceUnavailableException();
     }
 
+    Logger.debug(runtimeType, 'Getting permission status...');
     _permissionStatus = await _location.hasPermission();
+    Logger.debug(runtimeType, 'Status: $_permissionStatus');
     if (_permissionStatus == location_backend.PermissionStatus.deniedForever) {
       throw LocationServicePermissionException();
     }
 
     if (_permissionStatus == location_backend.PermissionStatus.denied) {
-      _permissionStatus = await _location.requestPermission();
+      Logger.debug(runtimeType, 'Requesting permission...');
+      _permissionStatus = await _requestPermissionAndGetStatus();
+      Logger.debug(runtimeType, 'Permission requested. Status: $_permissionStatus');
       if (_permissionStatus != location_backend.PermissionStatus.granted) {
         throw LocationServicePermissionException();
       }
@@ -94,7 +102,7 @@ class LocationService {
     if (!_isEnabled) throw LocationServiceUnavailableException();
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
-      _permissionStatus = await _location.requestPermission();
+      _permissionStatus = await _requestPermissionAndGetStatus();
     }
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
@@ -108,6 +116,12 @@ class LocationService {
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
       throw LocationServicePermissionException();
     }
+  }
+
+  Future<location_backend.PermissionStatus> _requestPermissionAndGetStatus() async {
+    var status = await _location.requestPermission();
+    if (kIsWeb) status = await _location.hasPermission(); // Kludge to fix bug on web
+    return status;
   }
 }
 
