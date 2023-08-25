@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const notificationPromptKey = 'NOTIFICATIONS_PROMPT';
+const _webVapidKey = 'BJl_TKOFDQSeCR7qMgudU_pnhkz2eW6MygZ8GB9Jb-IjUfEiaQm4i-trxzrAt3FF_lWNKsZm3xfEIYlaMxsHqj4';
 
 class NotificationsService {
   static final NotificationsService instance = NotificationsService();
@@ -55,7 +56,7 @@ class NotificationsService {
 
   Future<void> updateToken(RequestsService requests) async {
     if (!_isEnabled) throw StateError('not enabled');
-    final token = await _fbm.getToken();
+    final token = await _fbm.getToken(vapidKey: _webVapidKey);
     if (token == null) {
       Logger.warn(runtimeType, 'FCM Token was null');
       return;
