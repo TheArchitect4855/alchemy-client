@@ -61,6 +61,12 @@ class LocationService {
   }
 
   Future<String?> getLocationName(Location location) async {
+    if (kIsWeb) {
+      // TODO: Either deprecate the web client or set up
+      // a proper geocoding system. This is just temporary.
+      return 'Kelowna';
+    }
+
     final placemark = await getPlacemark(location);
     return placemark?.locality;
   }
