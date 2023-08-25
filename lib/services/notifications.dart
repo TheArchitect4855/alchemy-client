@@ -49,7 +49,10 @@ class NotificationsService {
 
   Future<void> requestPermissions() async {
     Logger.info(runtimeType, 'Request permissions...');
-    final settings = await _fbm.requestPermission();
+    NotificationSettings settings;
+    do {
+      settings = await _fbm.requestPermission();
+    } while (settings.authorizationStatus == AuthorizationStatus.notDetermined);
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
     _isEnabled = _isStatusEnabled(settings.authorizationStatus);
   }
