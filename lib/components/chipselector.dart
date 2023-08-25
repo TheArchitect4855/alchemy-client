@@ -54,7 +54,6 @@ class ChipSelector extends StatelessWidget {
     final children = <Widget>[
       Text(label, style: theme.textTheme.labelMedium),
       Wrap(
-        runSpacing: 8,
         spacing: 8,
         children: chips,
       ),
