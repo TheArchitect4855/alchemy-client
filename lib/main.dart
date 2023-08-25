@@ -1,3 +1,4 @@
+import 'package:alchemy/firebase_options.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ final textTheme = baseTextTheme
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final platform = ImagePickerPlatform.instance;
   if (platform is ImagePickerAndroid) {

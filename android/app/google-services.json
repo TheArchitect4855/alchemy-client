@@ -29,6 +29,14 @@
             {
               "client_id": "807536954475-gfctn3ls5l2ejq84felf3tvmm23rbk64.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "807536954475-l6e4j1919iv2a1l5ndkmogpr2fs6a65v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.usealchemy.alchemy",
+                "app_store_id": "6451447082"
+              }
             }
           ]
         }

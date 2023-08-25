@@ -134,7 +134,8 @@ class RequestsService {
     if (_userAgent != null) return _userAgent!;
 
     final packageInfo = await PackageInfo.fromPlatform();
-    _userAgent = 'Alchemy App ${packageInfo.version} build ${packageInfo.buildNumber} on ${Platform.operatingSystem} ${Platform.operatingSystemVersion}';
+    final platformString = kIsWeb ? 'Web' : '${Platform.operatingSystem} ${Platform.operatingSystemVersion}';
+    _userAgent = 'Alchemy App ${packageInfo.version} build ${packageInfo.buildNumber} on $platformString';
     Logger.info(runtimeType, 'User Agent: $_userAgent');
     return _userAgent!;
   }
