@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class BottomCard extends StatelessWidget {
@@ -11,6 +13,7 @@ class BottomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
+    final width = max(min(screenSize.width, screenSize.height * 0.6), 512) as double;
     return Scaffold(
       body: GestureDetector(
         // This is necessary because iOS is silly and doesn't have a button
@@ -31,7 +34,7 @@ class BottomCard extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: Container(
-              constraints: BoxConstraints(minHeight: screenSize.height * 0.7, minWidth: screenSize.width, maxWidth: screenSize.width),
+              constraints: BoxConstraints(minHeight: screenSize.height * 0.7, minWidth: width, maxWidth: width),
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.background,
