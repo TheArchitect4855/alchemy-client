@@ -38,7 +38,7 @@ class LocationService {
 
     if (_permissionStatus == location_backend.PermissionStatus.denied) {
       Logger.debug(runtimeType, 'Requesting permission...');
-      _permissionStatus = await _requestPermissionAndGetStatus();
+      _permissionStatus = await _requestPermissionWrapper();
       Logger.debug(runtimeType, 'Permission requested. Status: $_permissionStatus');
       if (_permissionStatus != location_backend.PermissionStatus.granted) {
         throw LocationServicePermissionException();
@@ -102,7 +102,7 @@ class LocationService {
     if (!_isEnabled) throw LocationServiceUnavailableException();
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
-      _permissionStatus = await _requestPermissionAndGetStatus();
+      _permissionStatus = await _requestPermissionWrapper();
     }
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
@@ -118,10 +118,24 @@ class LocationService {
     }
   }
 
-  Future<location_backend.PermissionStatus> _requestPermissionAndGetStatus() async {
-    var status = await _location.requestPermission();
-    if (kIsWeb) status = await _location.hasPermission(); // Kludge to fix bug on web
-    return status;
+  Future<location_backend.PermissionStatus> _requestPermissionWeb() async {
+    try {
+      await _location.getLocation();
+      return location_backend.PermissionStatus.granted;
+    } catch (e) {
+      Logger.error(runtimeType, 'Request Permission Error: $e');
+      return location_backend.PermissionStatus.denied;
+    }
+  }
+
+  Future<location_backend.PermissionStatus> _requestPermissionWrapper() {
+    // Wrapper is necessary here because the permissions stuff
+    // is mucked on web.
+    if (kIsWeb) {
+      return _requestPermissionWeb();
+    } else {
+      return _location.requestPermission();
+    }
   }
 }
 
