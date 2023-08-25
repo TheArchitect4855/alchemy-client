@@ -13,7 +13,7 @@ class BottomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
-    final width = max(min(screenSize.width, screenSize.height * 0.6), 512) as double;
+    final width = max(min(screenSize.width, screenSize.height * 0.6), 512).toDouble();
     return Scaffold(
       body: GestureDetector(
         // This is necessary because iOS is silly and doesn't have a button
