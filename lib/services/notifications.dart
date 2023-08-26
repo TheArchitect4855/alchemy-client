@@ -109,6 +109,6 @@ class NotificationsService {
     if (!kIsWeb) return true;
 
     final ua = WebPlatformData.userAgent;
-    return ua.browser != 'safari';
+    return ua.platform != 'ios';
   }
 }

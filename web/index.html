@@ -40,8 +40,6 @@
   <script src="flutter.js" defer></script>
 </head>
 <body>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
@@ -57,7 +55,7 @@
       });
 
       if ('serviceWorker' in navigator) {
-        if (identifyUserAgent().browser == 'safari') console.warn('FBM does not support Safari');
+        if (identifyUserAgent().platform == 'ios') console.warn('FBM does not support iOS');
         else navigator.serviceWorker.register('/firebase-messaging-sw.js');
       }
     });
@@ -70,7 +68,13 @@
       // that it's Firefox.
       const ua = navigator.userAgent;
       const isMobile = ua.includes('Mobile');
-      if (ua.includes('Firefox/')) return { isMobile, browser: 'firefox', engine: 'gecko' };
+      let platform = 'unknown';
+      if (ua.includes('iPhone')) platform = 'ios';
+      else if (ua.includes('Android')) platform = 'android';
+      else if (ua.includes('Linux')) platform = 'linux';
+      else if (ua.includes('Windows')) platform = 'windows';
+
+      if (ua.includes('Firefox/')) return { isMobile, platform, browser: 'firefox', engine: 'gecko' };
 
       // Now here's the fun part...
       // The Safari UA says it's Apple Web Kit, and also Safari.
@@ -79,10 +83,10 @@
       // It's fucking stupid.
       // But we check these in reverse order, until one matches.
       // 80% of the time, it works 100% of the time.
-      if (ua.includes('Edg/')) return { isMobile, browser: 'edge', engine: 'chromium' }; // Sidenote: I had to open Edge to check this, and the homepage is literally 100% ads.
-      if (ua.includes('Chrome/')) return { isMobile, browser: 'chrome', engine: 'chromium' };
-      if (ua.includes('Safari')) return { isMobile, browser: 'safari', engine: 'webkit' };
-      return { isMobile, browser: 'unknown', engine: 'unknown' };
+      if (ua.includes('Edg/')) return { isMobile, platform, browser: 'edge', engine: 'chromium' }; // Sidenote: I had to open Edge to check this, and the homepage is literally 100% ads.
+      if (ua.includes('Chrome/')) return { isMobile, platform, browser: 'chrome', engine: 'chromium' };
+      if (ua.includes('Safari/')) return { isMobile, platform, browser: 'safari', engine: 'webkit' };
+      return { isMobile, platform, browser: 'unknown', engine: 'unknown' };
     }
   </script>
 </body>

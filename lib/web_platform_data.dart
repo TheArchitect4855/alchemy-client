@@ -7,6 +7,7 @@ class WebPlatformData {
 @JS()
 class UserAgent {
   external bool isMobile;
+  external String platform;
   external String browser;
   external String engine;
 }
