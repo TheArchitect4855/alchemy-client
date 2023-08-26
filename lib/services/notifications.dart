@@ -1,6 +1,8 @@
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/services/requests.dart';
+import 'package:alchemy/web_platform_data.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const notificationPromptKey = 'NOTIFICATIONS_PROMPT';
@@ -12,7 +14,7 @@ class NotificationsService {
   bool get isEnabled => _isEnabled;
   bool get isInitialized => _isInitialized;
 
-  final FirebaseMessaging _fbm = FirebaseMessaging.instance;
+  final FirebaseMessaging? _fbm = _isSupported() ? null : FirebaseMessaging.instance;
   final List<void Function(RemoteMessage)> _onMessageListeners = [];
   final List<void Function(RemoteMessage)> _onMessageOpenedAppListeners = [];
   final List<RemoteMessage> _openAppMessages = [];
@@ -21,11 +23,15 @@ class NotificationsService {
 
   Future<void> initialize(RequestsService requests) async {
     if (_isInitialized) throw StateError('already initialized');
+    if (_fbm == null) {
+      _isInitialized = true;
+      return;
+    }
 
     final prefs = await SharedPreferences.getInstance();
     final shownPrompt = prefs.getBool(notificationPromptKey) ?? false;
 
-    final settings = await _fbm.getNotificationSettings();
+    final settings = await _fbm!.getNotificationSettings();
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
 
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined || !shownPrompt) {
@@ -48,10 +54,12 @@ class NotificationsService {
   }
 
   Future<void> requestPermissions() async {
+    if (_fbm == null) return;
+
     Logger.info(runtimeType, 'Request permissions...');
     NotificationSettings settings;
     do {
-      settings = await _fbm.requestPermission();
+      settings = await _fbm!.requestPermission();
     } while (settings.authorizationStatus == AuthorizationStatus.notDetermined);
     Logger.info(runtimeType, 'Auth status: ${settings.authorizationStatus}');
     _isEnabled = _isStatusEnabled(settings.authorizationStatus);
@@ -59,7 +67,9 @@ class NotificationsService {
 
   Future<void> updateToken(RequestsService requests) async {
     if (!_isEnabled) throw StateError('not enabled');
-    final token = await _fbm.getToken(vapidKey: _webVapidKey);
+    if (_fbm == null) return;
+
+    final token = await _fbm!.getToken(vapidKey: _webVapidKey);
     if (token == null) {
       Logger.warn(runtimeType, 'FCM Token was null');
       return;
@@ -93,5 +103,12 @@ class NotificationsService {
       default:
         throw UnimplementedError('unhandled status $status');
     }
+  }
+
+  static bool _isSupported() {
+    if (!kIsWeb) return true;
+
+    final ua = WebPlatformData.userAgent;
+    return ua.browser != 'safari';
   }
 }

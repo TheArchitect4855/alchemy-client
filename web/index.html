@@ -57,9 +57,33 @@
       });
 
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        if (identifyUserAgent().browser == 'safari') console.warn('FBM does not support Safari');
+        else navigator.serviceWorker.register('/firebase-messaging-sw.js');
       }
     });
+
+    function identifyUserAgent() {
+      // User Agents are fucking insane. I dunno
+      // whose idea it was to make them all the
+      // same, but I hope they regret their choices.
+      // Conveniently though, Firefox just says
+      // that it's Firefox.
+      const ua = navigator.userAgent;
+      const isMobile = ua.includes('Mobile');
+      if (ua.includes('Firefox/')) return { isMobile, browser: 'firefox', engine: 'gecko' };
+
+      // Now here's the fun part...
+      // The Safari UA says it's Apple Web Kit, and also Safari.
+      // Chrome says all of that, plus that it's Chrome.
+      // Edge says all that other stuff, plus that it's "Edg".
+      // It's fucking stupid.
+      // But we check these in reverse order, until one matches.
+      // 80% of the time, it works 100% of the time.
+      if (ua.includes('Edg/')) return { isMobile, browser: 'edge', engine: 'chromium' }; // Sidenote: I had to open Edge to check this, and the homepage is literally 100% ads.
+      if (ua.includes('Chrome/')) return { isMobile, browser: 'chrome', engine: 'chromium' };
+      if (ua.includes('Safari')) return { isMobile, browser: 'safari', engine: 'webkit' };
+      return { isMobile, browser: 'unknown', engine: 'unknown' };
+    }
   </script>
 </body>
 </html>
