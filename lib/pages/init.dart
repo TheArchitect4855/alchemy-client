@@ -134,9 +134,13 @@ class _InitPageState extends State<InitPage> {
     }
 
     try {
+      Logger.debug(runtimeType, 'Initializing notifications');
       final notifications = NotificationsService.instance;
+      Logger.debug(runtimeType, 'Initialized: ${notifications.isInitialized}');
       if (!notifications.isInitialized) {
+        Logger.debug(runtimeType, 'Initializing notifications...');
         await notifications.initialize(RequestsService.instance);
+        Logger.debug(runtimeType, 'Notifications initialized.');
       }
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);

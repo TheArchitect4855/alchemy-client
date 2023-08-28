@@ -14,7 +14,7 @@ class NotificationsService {
   bool get isEnabled => _isEnabled;
   bool get isInitialized => _isInitialized;
 
-  final FirebaseMessaging? _fbm = _isSupported() ? null : FirebaseMessaging.instance;
+  final FirebaseMessaging? _fbm = _isSupported() ? FirebaseMessaging.instance : null;
   final List<void Function(RemoteMessage)> _onMessageListeners = [];
   final List<void Function(RemoteMessage)> _onMessageOpenedAppListeners = [];
   final List<RemoteMessage> _openAppMessages = [];
@@ -109,6 +109,7 @@ class NotificationsService {
     if (!kIsWeb) return true;
 
     final ua = WebPlatformData.userAgent;
+    Logger.debug(NotificationsService, 'Web Platform Data: ${ua.browser} ${ua.engine} ${ua.isMobile} ${ua.platform}');
     return ua.platform != 'ios';
   }
 }
