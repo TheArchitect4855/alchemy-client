@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:alchemy/logger.dart';
+import 'package:alchemy/web_platform_data/interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart';
@@ -112,8 +113,13 @@ class RequestsService {
     final userAgent = await _getUserAgent();
     final res = {
       'Content-Type': 'application/json',
-      'User-Agent': userAgent,
     };
+
+    if (kIsWeb) {
+      res['X-Client-Info'] = userAgent;
+    } else {
+      res['User-Agent'] = userAgent;
+    }
 
     if (_authToken != null) res['Authorization'] = 'Bearer $_authToken';
     return res;
@@ -134,7 +140,14 @@ class RequestsService {
     if (_userAgent != null) return _userAgent!;
 
     final packageInfo = await PackageInfo.fromPlatform();
-    final platformString = kIsWeb ? 'Web' : '${Platform.operatingSystem} ${Platform.operatingSystemVersion}';
+    final String platformString;
+    if (kIsWeb) {
+      final webPlatformData = WebPlatformData.instance;
+      platformString = '${webPlatformData.userAgent.browser} ${webPlatformData.userAgent.platform}';
+    } else {
+      platformString = '${Platform.operatingSystem} ${Platform.operatingSystemVersion}';
+    }
+
     _userAgent = 'Alchemy App ${packageInfo.version} build ${packageInfo.buildNumber} on $platformString';
     Logger.info(runtimeType, 'User Agent: $_userAgent');
     return _userAgent!;
