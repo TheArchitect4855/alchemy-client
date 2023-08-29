@@ -19,19 +19,27 @@ class LocationService {
     if (_isInitialized) throw StateError('already initialized');
     _isInitialized = true;
 
+    Logger.debug(runtimeType, 'Initialize...');
     _isEnabled = await _location.serviceEnabled();
+    Logger.debug(runtimeType, 'Enabled: $_isEnabled');
     if (!_isEnabled) {
+      Logger.debug(runtimeType, 'Requesting location service...');
       _isEnabled = await _location.requestService();
+      Logger.debug(runtimeType, 'Service requested. Enabled: $_isEnabled');
       if (!_isEnabled) throw LocationServiceUnavailableException();
     }
 
+    Logger.debug(runtimeType, 'Getting permission status...');
     _permissionStatus = await _location.hasPermission();
+    Logger.debug(runtimeType, 'Status: $_permissionStatus');
     if (_permissionStatus == location_backend.PermissionStatus.deniedForever) {
       throw LocationServicePermissionException();
     }
 
     if (_permissionStatus == location_backend.PermissionStatus.denied) {
-      _permissionStatus = await _location.requestPermission();
+      Logger.debug(runtimeType, 'Requesting permission...');
+      _permissionStatus = await _requestPermissionWrapper();
+      Logger.debug(runtimeType, 'Permission requested. Status: $_permissionStatus');
       if (_permissionStatus != location_backend.PermissionStatus.granted) {
         throw LocationServicePermissionException();
       }
@@ -94,7 +102,7 @@ class LocationService {
     if (!_isEnabled) throw LocationServiceUnavailableException();
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
-      _permissionStatus = await _location.requestPermission();
+      _permissionStatus = await _requestPermissionWrapper();
     }
 
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
@@ -107,6 +115,26 @@ class LocationService {
     if (!_isEnabled) throw LocationServiceUnavailableException();
     if (_permissionStatus != location_backend.PermissionStatus.granted) {
       throw LocationServicePermissionException();
+    }
+  }
+
+  Future<location_backend.PermissionStatus> _requestPermissionWeb() async {
+    try {
+      await _location.getLocation();
+      return location_backend.PermissionStatus.granted;
+    } catch (e) {
+      Logger.error(runtimeType, 'Request Permission Error: $e');
+      return location_backend.PermissionStatus.denied;
+    }
+  }
+
+  Future<location_backend.PermissionStatus> _requestPermissionWrapper() {
+    // Wrapper is necessary here because the permissions stuff
+    // is mucked on web.
+    if (kIsWeb) {
+      return _requestPermissionWeb();
+    } else {
+      return _location.requestPermission();
     }
   }
 }

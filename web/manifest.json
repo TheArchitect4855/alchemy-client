@@ -7,7 +7,13 @@
     "theme_color": "#0175C2",
     "description": "Alchemy: Neurodiverse Dating",
     "orientation": "portrait-primary",
-    "prefer_related_applications": false,
+    "prefer_related_applications": true,
+    "related_applications": [
+        {
+            "platform": "play",
+            "id": "app.usealchemy.alchemy"
+        }
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
