@@ -3,7 +3,6 @@ import 'package:alchemy/components/bottomcard.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:alchemy/services/location.dart';
-import 'package:alchemy/services/requests.dart';
 import 'package:flutter/material.dart';
 
 class LocationRequestPage extends StatelessWidget {
@@ -28,7 +27,7 @@ class LocationRequestPage extends StatelessWidget {
       }
 
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const InitPage()), (route) => false);
-    } on RequestsServiceException {
+    } on LocationServiceException {
       Logger.info(runtimeType, 'Permission was not granted');
     }
   }
