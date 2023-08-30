@@ -1,5 +1,6 @@
 import 'package:alchemy/data/callingcode.dart';
 import 'package:alchemy/logger.dart';
+import 'package:alchemy/pages/countdown.dart';
 import 'package:alchemy/pages/error.dart';
 import 'package:alchemy/pages/home.dart';
 import 'package:alchemy/pages/login.dart';
@@ -22,6 +23,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/routing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+final liveDate = DateTime.utc(2023, 9, 9);
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key});
@@ -142,6 +145,12 @@ class _InitPageState extends State<InitPage> {
 
     if (!authService.contact!.tosAgreed) {
       replaceRoute(context, const SignupTosPage());
+      return;
+    }
+
+    final now = DateTime.now();
+    if (now.isBefore(liveDate)) {
+      replaceRoute(context, const CountdownPage());
       return;
     }
 
