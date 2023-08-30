@@ -12,10 +12,13 @@ import 'package:alchemy/pages/signup/photos.dart';
 import 'package:alchemy/pages/signup/tos.dart';
 import 'package:alchemy/pages/tutorial.dart';
 import 'package:alchemy/pages/unavailable.dart';
+import 'package:alchemy/pages/update_required.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/location.dart';
 import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
+import 'package:alchemy/services/updates.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/routing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,10 +48,26 @@ class _InitPageState extends State<InitPage> {
 
   Future<void> init() async {
     Logger.info(runtimeType, 'Initializing...');
+    final requestsService = RequestsService.instance;
+    try {
+      final isUpdateRequired = await UpdatesService.instance.isUpdateRequired(requestsService);
+      if (isUpdateRequired && kIsWeb) {
+        Logger.error(runtimeType, 'Web client is out of date. This should never happen!');
+      } else if (isUpdateRequired) {
+        replaceRoute(context, UpdateRequiredPage());
+        return;
+      }
+    } on RequestsServiceException catch (e) {
+      Logger.error(runtimeType, 'Failed to get app version: $e. Continuing...');
+    } on Exception catch (e) {
+      Logger.exception(runtimeType, e);
+      replaceRoute(context, ErrorPage(message: e.toString()));
+      return;
+    }
+
     if (!CallingCode.isLoaded) await CallingCode.loadCallingCodes();
 
     final authService = AuthService.instance;
-    final requestsService = RequestsService.instance;
     _checkLogRequests(requestsService);
 
     try {
