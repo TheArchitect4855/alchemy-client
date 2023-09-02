@@ -82,7 +82,7 @@ class _InitPageState extends State<InitPage> {
         // i.e., this should basically never happen.
         // However, to handle this case, we'll "log out" so that
         // the auth service can resync with the server.
-        AuthService.instance.logout(RequestsService.instance);
+        await AuthService.instance.logout(RequestsService.instance);
       } else {
         Logger.exception(runtimeType, e);
         replaceRoute(context, ErrorPage(message: e.message));
