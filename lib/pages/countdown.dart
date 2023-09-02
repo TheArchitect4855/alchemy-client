@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:alchemy/services/explore.dart';
 import 'package:alchemy/services/location.dart';
@@ -23,6 +24,7 @@ class _CountdownPageState extends State<CountdownPage> {
   late final Timer _timer;
   late String _countdown;
   final List<ImageProvider> _previewImages = [];
+  DateTime _lastExploreUpdate = DateTime.now();
 
   @override
   void initState() {
@@ -125,12 +127,21 @@ class _CountdownPageState extends State<CountdownPage> {
 
   void _loadPreviewProfiles() async {
     final profiles = await ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
+    _previewImages.clear();
     _previewImages.addAll(profiles.map((e) => NetworkImage(e.photoUrls[0])));
   }
 
   void _tick(Timer timer) {
+    final now = DateTime.now();
+    final d = now.difference(_lastExploreUpdate);
+    if (d.inMinutes >= 5) {
+      Logger.info(runtimeType, 'Refreshing preview profiles...');
+      _loadPreviewProfiles();
+      _lastExploreUpdate = now;
+    }
+
     setState(() {
-      _countdown =_getCountdown();
+      _countdown = _getCountdown();
     });
   }
 }
