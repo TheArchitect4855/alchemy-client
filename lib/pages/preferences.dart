@@ -179,7 +179,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
   void _setAllowNotifications(bool value) async {
     final notifications = NotificationsService.instance;
-    if (value && !notifications.isEnabled) {
+    if (value &&
+        !notifications.isEnabled &&
+        notifications is FcmNotificationsService) {
       await notifications.requestPermissions();
     }
 

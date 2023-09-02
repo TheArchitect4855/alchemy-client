@@ -25,6 +25,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final FcmNotificationsService? _notificationsService;
   late Future<List<Profile>> _profilesFuture;
   late DateTime _profilesLastRefresh;
   late Future<List<Match>> _matchesFuture;
@@ -34,8 +35,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    NotificationsService.instance.addOnMessageListener(_onMessage);
-    NotificationsService.instance.addOnMessageOpenedAppListener(_onMessageOpenedApp);
+    if (NotificationsService.instance is FcmNotificationsService) {
+      _notificationsService =
+          NotificationsService.instance as FcmNotificationsService;
+    } else {
+      _notificationsService = null;
+    }
+
+    _notificationsService?.addOnMessageListener(_onMessage);
+    _notificationsService?.addOnMessageOpenedAppListener(_onMessageOpenedApp);
     _profilesFuture = ExploreService.instance.getPotentialMatches(
         LocationService.instance, RequestsService.instance);
     _profilesLastRefresh = DateTime.now();
@@ -70,18 +78,20 @@ class _HomePageState extends State<HomePage> {
       currentIndex: _currentIndex,
       messageNotificationBadge: _numUnreadConversations,
       onNavTapped: (v) => setState(() {
-          final elapsed = DateTime.now().difference(_profilesLastRefresh);
-          if (elapsed.inMinutes > 5) _refreshProfiles();
-          _currentIndex = v;
+        final elapsed = DateTime.now().difference(_profilesLastRefresh);
+        if (elapsed.inMinutes > 5) _refreshProfiles();
+        _currentIndex = v;
       }),
-      onSettingsPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PreferencesPage())),
+      onSettingsPressed: () => Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const PreferencesPage())),
     );
   }
 
   @override
   void dispose() {
-    NotificationsService.instance.removeOnMessageListener(_onMessage);
-    NotificationsService.instance.removeOnMessageOpenedAppListener(_onMessageOpenedApp);
+    _notificationsService?.removeOnMessageListener(_onMessage);
+    _notificationsService
+        ?.removeOnMessageOpenedAppListener(_onMessageOpenedApp);
     super.dispose();
   }
 

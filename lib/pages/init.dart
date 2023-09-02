@@ -53,9 +53,11 @@ class _InitPageState extends State<InitPage> {
     Logger.info(runtimeType, 'Initializing...');
     final requestsService = RequestsService.instance;
     try {
-      final isUpdateRequired = await UpdatesService.instance.isUpdateRequired(requestsService);
+      final isUpdateRequired =
+          await UpdatesService.instance.isUpdateRequired(requestsService);
       if (isUpdateRequired && kIsWeb) {
-        Logger.error(runtimeType, 'Web client is out of date. This should never happen!');
+        Logger.error(runtimeType,
+            'Web client is out of date. This should never happen!');
       } else if (isUpdateRequired) {
         replaceRoute(context, UpdateRequiredPage());
         return;
@@ -150,6 +152,8 @@ class _InitPageState extends State<InitPage> {
 
     final now = DateTime.now();
     if (now.isBefore(liveDate)) {
+      final notifications = NotificationsService.instance;
+      if (!notifications.isInitialized) await notifications.initialize();
       replaceRoute(context, const CountdownPage());
       return;
     }
@@ -167,7 +171,7 @@ class _InitPageState extends State<InitPage> {
       Logger.debug(runtimeType, 'Initialized: ${notifications.isInitialized}');
       if (!notifications.isInitialized) {
         Logger.debug(runtimeType, 'Initializing notifications...');
-        await notifications.initialize(RequestsService.instance);
+        await notifications.initialize();
         Logger.debug(runtimeType, 'Notifications initialized.');
       }
     } on Exception catch (e) {
