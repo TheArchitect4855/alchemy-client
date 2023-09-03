@@ -38,6 +38,10 @@ class ExploreService {
     return match == null ? null : Match.fromJson(match);
   }
 
+  void markProfilesDirty() {
+    _potentialMatches = null;
+  }
+
   List<Profile> _profilesBuilder(Map<String, dynamic> values) {
     final list = values['profiles'] as List<dynamic>;
     return list.map((v) => Profile.fromJson(v)).toList();
@@ -57,6 +61,7 @@ class ExploreService {
 
     _potentialMatchesTs = DateTime.now();
     _potentialMatches = response!;
+    _isLoading = false;
     if (onChanged != null) onChanged(_potentialMatches!);
   }
 }

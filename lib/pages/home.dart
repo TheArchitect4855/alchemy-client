@@ -78,8 +78,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       onNavTapped: (v) => setState(() {
         _currentIndex = v;
       }),
-      onSettingsPressed: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => const PreferencesPage())),
+      onSettingsPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PreferencesPage()))
+          .then((v) => _updateExploreProfiles()),
     );
   }
 
