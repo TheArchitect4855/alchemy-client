@@ -6,7 +6,6 @@ import 'package:alchemy/pages/explore.dart';
 import 'package:alchemy/pages/matches.dart';
 import 'package:alchemy/pages/preferences.dart';
 import 'package:alchemy/services/explore.dart';
-import 'package:alchemy/services/location.dart';
 import 'package:alchemy/services/match.dart';
 import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/requests.dart';
@@ -14,6 +13,7 @@ import 'package:alchemy/snackbar_util.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:alchemy/data/match.dart';
+import '../services/location.dart';
 
 const timeoutRetryCooldown = Duration(seconds: 30);
 
@@ -24,17 +24,17 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late final FcmNotificationsService? _notificationsService;
-  late Future<List<Profile>> _profilesFuture;
-  late DateTime _profilesLastRefresh;
   late Future<List<Match>> _matchesFuture;
   int _currentIndex = 0;
+  List<Profile>? _exploreProfiles;
   int _numUnreadConversations = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (NotificationsService.instance is FcmNotificationsService) {
       _notificationsService =
           NotificationsService.instance as FcmNotificationsService;
@@ -44,19 +44,17 @@ class _HomePageState extends State<HomePage> {
 
     _notificationsService?.addOnMessageListener(_onMessage);
     _notificationsService?.addOnMessageOpenedAppListener(_onMessageOpenedApp);
-    _profilesFuture = ExploreService.instance.getPotentialMatches(
-        LocationService.instance, RequestsService.instance);
-    _profilesLastRefresh = DateTime.now();
     _loadMatches();
   }
 
   @override
   Widget build(BuildContext context) {
+    _updateExploreProfiles();
     Widget currentView;
     switch (_currentIndex) {
       case 0:
         currentView = ExplorePage(
-          profilesFuture: _profilesFuture,
+          profiles: _exploreProfiles,
           onPopProfile: _onPopProfile,
         );
         break;
@@ -78,8 +76,6 @@ class _HomePageState extends State<HomePage> {
       currentIndex: _currentIndex,
       messageNotificationBadge: _numUnreadConversations,
       onNavTapped: (v) => setState(() {
-        final elapsed = DateTime.now().difference(_profilesLastRefresh);
-        if (elapsed.inMinutes > 5) _refreshProfiles();
         _currentIndex = v;
       }),
       onSettingsPressed: () => Navigator.push(
@@ -89,10 +85,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _notificationsService?.removeOnMessageListener(_onMessage);
     _notificationsService
         ?.removeOnMessageOpenedAppListener(_onMessageOpenedApp);
     super.dispose();
+  }
+
+  @override
+  didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _updateExploreProfiles();
   }
 
   void _loadMatches() async {
@@ -137,6 +139,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onPopProfile(Profile profile, bool isLiked) async {
+    _exploreProfiles?.remove(profile);
     if (!isLiked) return;
 
     try {
@@ -155,12 +158,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _refreshProfiles() async {
-    Logger.info(runtimeType, 'Refreshing explore profiles');
-    setState(() {
-      _profilesLastRefresh = DateTime.now();
-      _profilesFuture = ExploreService.instance.getPotentialMatches(
-          LocationService.instance, RequestsService.instance);
-    });
+  void _updateExploreProfiles() {
+    _exploreProfiles = ExploreService.instance
+        .getPotentialMatches(LocationService.instance, RequestsService.instance,
+            onChanged: (profiles) => setState(() {
+                  _exploreProfiles = profiles;
+                }));
   }
 }
