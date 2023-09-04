@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:alchemy/services/explore.dart';
 import 'package:alchemy/services/location.dart';
@@ -23,8 +22,7 @@ class _CountdownPageState extends State<CountdownPage> {
   late final Future<List<ImageProvider>> _imageSlicesFuture;
   late final Timer _timer;
   late String _countdown;
-  final List<ImageProvider> _previewImages = [];
-  DateTime _lastExploreUpdate = DateTime.now();
+  List<ImageProvider> _previewImages = [];
 
   @override
   void initState() {
@@ -32,34 +30,39 @@ class _CountdownPageState extends State<CountdownPage> {
     _imageSlicesFuture = _createImageSlices();
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
     _countdown = _getCountdown();
-    _loadPreviewProfiles();
+    _updatePreviewImages();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(body: SafeArea(
+    return Scaffold(
+        body: SafeArea(
       minimum: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Image.asset('assets/icon.png', height: 130),
-          Text(_countdown, style: theme.textTheme.displayLarge, textAlign: TextAlign.center),
-          const Text("You'll be able to start matching once the timer runs out. Check back regularly to see who's in your area!", textAlign: TextAlign.center),
-          Expanded(child: FutureBuilder(
-            future: _imageSlicesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return LayoutBuilder(
-                  builder: (context, constraints) => Wrap(
-                    children: _buildPreviewProfiles(constraints, snapshot.data!),
-                  ),
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            }
-          )),
+          Text(_countdown,
+              style: theme.textTheme.displayLarge, textAlign: TextAlign.center),
+          const Text(
+              "You'll be able to start matching once the timer runs out. Check back regularly to see who's in your area!",
+              textAlign: TextAlign.center),
+          Expanded(
+              child: FutureBuilder(
+                  future: _imageSlicesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return LayoutBuilder(
+                        builder: (context, constraints) => Wrap(
+                          children: _buildPreviewProfiles(
+                              constraints, snapshot.data!),
+                        ),
+                      );
+                    } else {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  })),
         ],
       ),
     ));
@@ -71,23 +74,27 @@ class _CountdownPageState extends State<CountdownPage> {
     super.dispose();
   }
 
-  List<Widget> _buildPreviewProfiles(BoxConstraints constraints, List<ImageProvider> imageSlices) {
+  List<Widget> _buildPreviewProfiles(
+      BoxConstraints constraints, List<ImageProvider> imageSlices) {
     const margin = 8.0;
     final res = <Widget>[];
     final width = constraints.maxWidth / previewSize - margin * 2;
     final height = constraints.maxHeight / previewSize - margin * 2;
     for (var i = 0; i < previewCount; i += 1) {
-      final image = i < _previewImages.length ? _previewImages[i] : imageSlices[i];
+      final image =
+          i < _previewImages.length ? _previewImages[i] : imageSlices[i];
       res.add(Container(
         width: width,
         height: height,
         margin: const EdgeInsets.all(margin),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            image: DecorationImage(image: image, fit: BoxFit.cover),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [ BoxShadow(color: Colors.black54, offset: Offset(4, 4), blurRadius: 4) ]
-          ),
+              image: DecorationImage(image: image, fit: BoxFit.cover),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black54, offset: Offset(4, 4), blurRadius: 4)
+              ]),
           position: DecorationPosition.foreground,
         ),
       ));
@@ -105,7 +112,8 @@ class _CountdownPageState extends State<CountdownPage> {
     for (int i = 0; i < previewCount; i += 1) {
       final x = rng.nextInt(source.width - sliceSize);
       final y = rng.nextInt(source.height - sliceSize);
-      final slice = image.copyCrop(source, x: x, y: y, width: sliceSize, height: sliceSize);
+      final slice = image.copyCrop(source,
+          x: x, y: y, width: sliceSize, height: sliceSize);
       final data = image.encodePng(slice);
       slices.add(MemoryImage(data));
     }
@@ -125,23 +133,18 @@ class _CountdownPageState extends State<CountdownPage> {
     return '$days:$hours:$minutes:$seconds';
   }
 
-  void _loadPreviewProfiles() async {
-    final profiles = await ExploreService.instance.getPotentialMatches(LocationService.instance, RequestsService.instance);
-    _previewImages.clear();
-    _previewImages.addAll(profiles.map((e) => NetworkImage(e.photoUrls[0])));
-  }
-
   void _tick(Timer timer) {
-    final now = DateTime.now();
-    final d = now.difference(_lastExploreUpdate);
-    if (d.inMinutes >= 5) {
-      Logger.info(runtimeType, 'Refreshing preview profiles...');
-      _loadPreviewProfiles();
-      _lastExploreUpdate = now;
-    }
-
     setState(() {
       _countdown = _getCountdown();
+      _updatePreviewImages();
     });
+  }
+
+  void _updatePreviewImages() {
+    final potentialMatches = ExploreService.instance.getPotentialMatches(
+        LocationService.instance, RequestsService.instance);
+    if (potentialMatches == null) return;
+    _previewImages =
+        potentialMatches.map((e) => NetworkImage(e.photoUrls.first)).toList();
   }
 }

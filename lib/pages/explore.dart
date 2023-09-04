@@ -3,26 +3,18 @@ import 'package:alchemy/data/profile.dart';
 import 'package:flutter/material.dart';
 
 class ExplorePage extends StatelessWidget {
-  final Future<List<Profile>> profilesFuture;
+  final List<Profile>? profiles;
   final void Function(Profile profile, bool isLiked) onPopProfile;
 
-  const ExplorePage({required this.profilesFuture, required this.onPopProfile, super.key});
+  const ExplorePage(
+      {required this.profiles, required this.onPopProfile, super.key});
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-        future: profilesFuture,
-    builder: (context, snapshot) {
-      final theme = Theme.of(context);
-      if (snapshot.hasData) {
-            return ProfileStack(profiles: snapshot.data!, onPopProfile: onPopProfile);
-      } else if (snapshot.hasError) {
-        return Center(child: Column(children: [
-          const Text('Error getting potential matches:', textAlign: TextAlign.center),
-          Text(snapshot.error?.toString() ?? 'No further information', textAlign: TextAlign.center, style: theme.textTheme.bodyMedium!.apply(color: theme.colorScheme.error)),
-        ]));
-      } else {
-        return const Center(child: CircularProgressIndicator());
-      }
-        },
-      );
+  Widget build(BuildContext context) {
+    if (profiles == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ProfileStack(profiles: profiles!, onPopProfile: onPopProfile);
+  }
 }

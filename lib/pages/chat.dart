@@ -23,6 +23,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  late final FcmNotificationsService? _notificationsService;
   late final TextEditingController _textController;
   final MatchService _matchService = MatchService.instance;
   final RequestsService _requestsService = RequestsService.instance;
@@ -36,9 +37,17 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
 
     final notifications = NotificationsService.instance;
-    notifications.addOnMessageListener(_onMessage);
-    if (notifications.isEnabled) notifications.updateToken(RequestsService.instance);
+    if (notifications.isEnabled) {
+      notifications.updateToken(RequestsService.instance);
+    }
 
+    if (notifications is FcmNotificationsService) {
+      _notificationsService = notifications;
+    } else {
+      _notificationsService = null;
+    }
+
+    _notificationsService?.addOnMessageListener(_onMessage);
     _textController = TextEditingController();
   }
 
@@ -109,7 +118,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
-    NotificationsService.instance.removeOnMessageListener(_onMessage);
+    _notificationsService?.removeOnMessageListener(_onMessage);
     _textController.dispose();
     super.dispose();
   }
@@ -192,8 +201,10 @@ class _ChatPageState extends State<ChatPage> {
 
   void _onMessage(RemoteMessage message) async {
     Logger.debug(runtimeType, 'on message: ${message.data}');
-    if (message.data['kind'] == 'match-message' && message.data['sender'] == widget.profile.uid) {
-      final m = Message(int.parse(message.data['id']), 1, message.data['content'], DateTime.parse(message.data['sentAt']));
+    if (message.data['kind'] == 'match-message' &&
+        message.data['sender'] == widget.profile.uid) {
+      final m = Message(int.parse(message.data['id']), 1,
+          message.data['content'], DateTime.parse(message.data['sentAt']));
       setState(() {
         if (_messages == null) {
           _messages = [m];

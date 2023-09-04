@@ -202,7 +202,7 @@ class AuthService {
       final dob = DateTime.fromMicrosecondsSinceEpoch(jwt['dob']);
       final flags =
           (jwt['flg'] as String).split('').map((e) => e == '1').toList();
-      _contact = Contact(jwt['sub'], dob, flags[0], flags[1]);
+      _contact = Contact(jwt['sub'], jwt['phn'], dob, flags[0], flags[1]);
     } else {
       return;
     }
@@ -244,7 +244,7 @@ class AuthService {
       final dob = DateTime.fromMillisecondsSinceEpoch(jwt!['dob']);
       final flags =
           (jwt['flg'] as String).split('').map((e) => e == '1').toList();
-      _contact = Contact(jwt['sub'], dob, flags[0], flags[1]);
+      _contact = Contact(jwt['sub'], jwt['phn'], dob, flags[0], flags[1]);
     } else {
       return;
     }

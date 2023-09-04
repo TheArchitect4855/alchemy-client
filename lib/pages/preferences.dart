@@ -5,6 +5,7 @@ import 'package:alchemy/gender_kind.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/init.dart';
 import 'package:alchemy/services/auth.dart';
+import 'package:alchemy/services/explore.dart';
 import 'package:alchemy/services/notifications.dart';
 import 'package:alchemy/services/preferences.dart';
 import 'package:alchemy/services/requests.dart';
@@ -162,6 +163,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
   Future<void> _save() async {
     try {
       if (_isDirty) {
+        ExploreService.instance.markProfilesDirty();
         await _preferencesService.setPreferences(
             _preferences!, _requestsService);
       }
@@ -179,7 +181,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
 
   void _setAllowNotifications(bool value) async {
     final notifications = NotificationsService.instance;
-    if (value && !notifications.isEnabled) {
+    if (value &&
+        !notifications.isEnabled &&
+        notifications is FcmNotificationsService) {
       await notifications.requestPermissions();
     }
 
