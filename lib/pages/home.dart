@@ -1,8 +1,8 @@
 import 'package:alchemy/components/home_scaffold.dart';
+import 'package:alchemy/components/profilestack.dart';
 import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/edit_profile.dart';
-import 'package:alchemy/pages/explore.dart';
 import 'package:alchemy/pages/matches.dart';
 import 'package:alchemy/pages/preferences.dart';
 import 'package:alchemy/services/explore.dart';
@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late Future<List<Match>> _matchesFuture;
   int _currentIndex = 0;
   List<Profile>? _exploreProfiles;
+  int _exploreProfileIndex = 0;
   int _numUnreadConversations = 0;
 
   @override
@@ -44,6 +45,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     _notificationsService?.addOnMessageListener(_onMessage);
     _notificationsService?.addOnMessageOpenedAppListener(_onMessageOpenedApp);
+    _updateExploreProfiles();
     _loadMatches();
   }
 
@@ -53,10 +55,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     Widget currentView;
     switch (_currentIndex) {
       case 0:
-        currentView = ExplorePage(
-          profiles: _exploreProfiles,
-          onPopProfile: _onPopProfile,
-        );
+        if (_exploreProfiles == null) {
+          currentView = const Center(child: CircularProgressIndicator());
+        } else {
+          currentView = ProfileStack(profiles: _exploreProfiles!.sublist(_exploreProfileIndex), onPopProfile: _onPopProfile);
+        }
+
         break;
       case 1:
         currentView = const EditProfilePage();
@@ -76,6 +80,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       currentIndex: _currentIndex,
       messageNotificationBadge: _numUnreadConversations,
       onNavTapped: (v) => setState(() {
+        if (v == 0) _updateExploreProfiles();
         _currentIndex = v;
       }),
       onSettingsPressed: () => Navigator.push(context,
@@ -140,7 +145,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _onPopProfile(Profile profile, bool isLiked) async {
-    _exploreProfiles?.remove(profile);
+    setState(() {
+      _exploreProfileIndex += 1;
+    });
+
     if (!isLiked) return;
 
     try {
@@ -164,6 +172,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         .getPotentialMatches(LocationService.instance, RequestsService.instance,
             onChanged: (profiles) => setState(() {
                   _exploreProfiles = profiles;
+                  _exploreProfileIndex = 0;
                 }));
   }
 }

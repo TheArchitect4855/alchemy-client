@@ -73,6 +73,8 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
       setState(() {
         _callingCode = null;
         _isPhoneValid = false;
+        _textController.text = '+';
+        _errorText = formatErrorMessage;
       });
 
       return;
