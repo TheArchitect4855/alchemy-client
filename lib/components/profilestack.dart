@@ -47,7 +47,6 @@ class _ProfileStackState extends State<ProfileStack> {
   Velocity _flyoutVelocity = Velocity.zero;
   bool _isCurrentProfileLiked = false;
   _ProfileAnimationState _profileAnimationState = _ProfileAnimationState.none;
-  int _profileIndex = 0;
 
   @override
   void initState() {
@@ -60,15 +59,15 @@ class _ProfileStackState extends State<ProfileStack> {
 
   @override
   Widget build(BuildContext context) {
-    if (_profileIndex >= widget.profiles.length) {
+    if (widget.profiles.isEmpty) {
       final profile = AuthService.instance.profile!;
       return NoProfiles(imageUrl: profile.photoUrls[0]);
     }
 
     Widget under;
-    if (_profileIndex + 1 < widget.profiles.length) {
+    if (widget.profiles.length > 1) {
       under = ProfileView(
-        widget.profiles[_profileIndex + 1],
+        widget.profiles[1],
         isLiked: false,
         currentPhoto: 0,
         onPressDetails: null,
@@ -80,7 +79,7 @@ class _ProfileStackState extends State<ProfileStack> {
       under = NoProfiles(imageUrl: profile.photoUrls[0]);
     }
 
-    final profile = widget.profiles[_profileIndex];
+    final profile = widget.profiles[0];
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -188,14 +187,13 @@ class _ProfileStackState extends State<ProfileStack> {
   }
 
   void _popProfile() {
-    widget.onPopProfile(widget.profiles[_profileIndex], _isCurrentProfileLiked);
+    widget.onPopProfile(widget.profiles[0], _isCurrentProfileLiked);
     setState(() {
       _currentProfilePhoto = 0;
       _isCurrentProfileLiked = false;
       _dragOffset = Offset.zero;
       _flyoutVelocity = Velocity.zero;
       _profileAnimationState = _ProfileAnimationState.none;
-      _profileIndex += 1;
     });
   }
 
