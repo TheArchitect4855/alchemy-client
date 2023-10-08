@@ -9,9 +9,12 @@ const baseTextTheme = Typography.englishLike2021;
 const primaryColor = Color(0xff7cff66);
 final colorScheme = ColorScheme.fromSeed(
     seedColor: primaryColor,
+    onBackground: const Color(0xffe8f2e6),
     primary: primaryColor,
     secondary: const Color(0xff00d2fc),
-    error: Colors.red);
+    error: Colors.red,
+);
+
 final textTheme = baseTextTheme
     .copyWith(
       displayLarge: baseTextTheme.displayLarge!.copyWith(

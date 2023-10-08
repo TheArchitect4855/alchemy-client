@@ -2,6 +2,7 @@ import 'package:alchemy/components/labeled_checkbox.dart';
 import 'package:alchemy/components/multipage_bottomcard.dart';
 import 'package:alchemy/pages/signup/finalize.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignupTosPage extends StatefulWidget {
   const SignupTosPage({super.key});
@@ -41,7 +42,15 @@ class _SignupTosPageState extends State<SignupTosPage> {
           onChanged: (v) => setState(() {
             _agreeTos = v;
           }),
-        )
+        ),
+        TextButton(
+          child: const Text('Terms of Service'),
+          onPressed: () => launchUrl(Uri.parse('https://usealchemy.app/legal/tos'), mode: LaunchMode.externalApplication),
+        ),
+        TextButton(
+          child: const Text('Privacy Policy'),
+          onPressed: () => launchUrl(Uri.parse('https://usealchemy.app/legal/privacy'), mode: LaunchMode.externalApplication),
+        ),
       ],
     );
   }
