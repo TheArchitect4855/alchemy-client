@@ -1,6 +1,7 @@
 import 'package:alchemy/components/home_scaffold.dart';
 import 'package:alchemy/components/profilestack.dart';
 import 'package:alchemy/data/profile.dart';
+import 'package:alchemy/data/profile_interaction.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/edit_profile.dart';
 import 'package:alchemy/pages/matches.dart';
@@ -143,14 +144,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  void _onPopProfile(Profile profile, bool isLiked) async {
+  void _onPopProfile(Profile profile, Set<ProfileInteraction> interactions) async {
     setState(() {
       _exploreProfileIndex += 1;
     });
 
-    if (!isLiked) return;
+    if (interactions.isEmpty) return;
 
     try {
+      // TODO: Update this to use new interactions system
       final match = await ExploreService.instance
           .likeProfile(profile, RequestsService.instance);
 

@@ -63,9 +63,9 @@ class Profile {
 
     res.add(ProfileChip(genderDisplay, baseColor: baseColor));
 
-    for (String s in relationshipInterests) {
-      res.add(ProfileChip(capitalizeWords(s), baseColor: baseColor));
-    }
+    // for (String s in relationshipInterests) {
+    //   res.add(ProfileChip(capitalizeWords(s), baseColor: baseColor));
+    // }
 
     for (String nd in neurodiversities) {
       res.add(ProfileChip(nd, baseColor: baseColor));

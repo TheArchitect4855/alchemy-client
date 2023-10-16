@@ -1,25 +1,25 @@
-import 'dart:math';
-import 'package:alchemy/components/photogesturedetector.dart';
+import 'package:alchemy/components/profile_interact_buttons.dart';
 import 'package:alchemy/data/profile.dart';
+import 'package:alchemy/data/profile_interaction.dart';
 import 'package:flutter/material.dart';
 
 const maxDisplayInterests = 5;
 
 class ProfileView extends StatelessWidget {
   final Profile profile;
-  final bool isLiked;
+  final Set<ProfileInteraction> interactions;
   final int currentPhoto;
   final Key? infoButtonKey;
   final Key? likeButtonKey;
+  final void Function(Set<ProfileInteraction>)? onInteract;
   final void Function()? onPressDetails;
-  final void Function(bool value)? onLike;
   final void Function(int value)? onPhotoChanged;
 
   const ProfileView(this.profile, {
-    required this.isLiked,
+    required this.interactions,
     required this.currentPhoto,
+    required this.onInteract,
     required this.onPressDetails,
-    required this.onLike,
     required this.onPhotoChanged,
       this.infoButtonKey,
       this.likeButtonKey,
@@ -27,109 +27,111 @@ class ProfileView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (context, constraints) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final headlineWhite = theme.textTheme.headlineLarge!.apply(color: Colors.white);
-    final chips = profile.buildChips(Colors.white, max: maxDisplayInterests);
-
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.background,
-        image: profile.photoUrls.isEmpty ? null : DecorationImage(
-          image: NetworkImage(profile.photoUrls[currentPhoto]),
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [ BoxShadow(blurRadius: 8) ],
-      ),
+    final textTheme = theme.textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white);
+    final borderRadius = BorderRadius.circular(8);
+    return DefaultTextStyle(
+      style: textTheme.bodySmall!,
       child: Container(
-        alignment: Alignment.bottomCenter,
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          gradient: const LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.center,
-            colors: [ Colors.black, Colors.transparent ],
-          ),
+          borderRadius: borderRadius,
+          color: Colors.white,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: PhotoGestureDetector(
-              onTapLeft: () => _setCurrentPhoto(currentPhoto - 1),
-              onTapRight: () => _setCurrentPhoto(currentPhoto + 1),
-            )),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+        margin: const EdgeInsets.all(4),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            boxShadow: const [ BoxShadow(color: Colors.black54, blurRadius: 4) ],
+            image: DecorationImage(
+              image: NetworkImage(profile.photoUrls[currentPhoto]),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              gradient: const LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.center,
+                colors: [ Colors.black87, Colors.transparent ],
+              ),
+            ),
+            child: LayoutBuilder(builder: (context, constraints) => Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: constraints.maxWidth - 145),
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                Expanded(child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: GestureDetector(onTap: () => _setPhoto(currentPhoto - 1))),
+                    Expanded(child: GestureDetector(onTap: () => _setPhoto(currentPhoto + 1))),
+                  ],
+                )),
+                Row(children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${profile.name}, ', style: headlineWhite, overflow: TextOverflow.ellipsis),
-                      Text(profile.age.toString(), style: headlineWhite),
-                      const SizedBox(width: 16),
-                      Text(profile.city, style: theme.textTheme.labelMedium!.apply(color: Colors.white)),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ConstrainedBox(
+                            // The subtracted value is largely arbitrary. It'll need to be changed if the layout changes
+                            // (I wish I knew of a better way to do this...)
+                            constraints: BoxConstraints.loose(Size(constraints.maxWidth - 232, constraints.maxHeight)),
+                            child: Text('${profile.name},', overflow: TextOverflow.ellipsis, style: textTheme.headlineMedium),
+                          ),
+                          Text(' ${profile.age}', style: textTheme.headlineMedium),
+                        ],
+                      ),
+                      Text(profile.city),
                     ],
                   ),
-                ),
-                    Expanded(
-                        child: Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        alignment: Alignment.centerRight,
-                        onPressed: onPressDetails,
-                        icon: Icon(Icons.info_outline, size: 18, color: Colors.white, key: infoButtonKey),
-                      ),
-                    )),
-                    IconButton(
-                      key: likeButtonKey,
-                      onPressed: onLike == null ? null : () => onLike!(!isLiked),
-                      icon: Icon(Icons.favorite, size: 48, color: isLiked ? Colors.red : Colors.white),
-                    ),
+                  IconButton(icon: const Icon(Icons.info_outline, color: Colors.white, size: 16), onPressed: onPressDetails),
+                  const Spacer(),
+                  ProfileInteractButtons(
+                    profile: profile,
+                    interactions: interactions,
+                    onInteract: onInteract,
+                  ),
+                ]),
+                Wrap(children: profile.buildChips(Colors.white, max: 8)),
+                _buildPhotoDots(),
               ],
-            ),
-            Wrap(
-              children: chips,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _buildPhotoDots(theme),
-            ),
-          ],
+            )),
+          ),
         ),
       ),
     );
-  });
+  }
 
-  List<Widget> _buildPhotoDots(ThemeData theme) {
-    final res = <Widget>[];
+  Widget _buildPhotoDots() {
+    final dots = <Widget>[];
     for (var i = 0; i < profile.photoUrls.length; i += 1) {
-      var color = theme.colorScheme.background;
-      if (i != currentPhoto) color = color.withOpacity(0.75);
-
-      res.add(Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      final color = i == currentPhoto ? Colors.white : Colors.white70;
+      dots.add(Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
           color: color,
-          boxShadow: const [ BoxShadow(blurRadius: 8) ],
-          shape: BoxShape.circle,
         ),
-        child: const SizedBox(width: 8, height: 8),
+        width: 8,
+        height: 8,
+        margin: const EdgeInsets.fromLTRB(4, 8, 4, 0),
       ));
     }
 
-    return res;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: dots,
+    );
   }
 
-  void _setCurrentPhoto(int value) {
+  void _setPhoto(int index) {
     if (onPhotoChanged == null) return;
-
-    int newValue = min(profile.photoUrls.length - 1, max(0, value));
-    onPhotoChanged!(newValue);
+    if (index >= profile.photoUrls.length) index = profile.photoUrls.length - 1;
+    if (index < 0) index = 0;
+    onPhotoChanged!(index);
   }
 }

@@ -88,8 +88,9 @@ class _TutorialPageState extends State<TutorialPage> {
         likeButtonKey: _likeButtonKey,
         profiles: [data.profile],
         onPopProfile: (profile, isLiked) => _nextState(),
-        onLike: () {
-          if (_state == _TutorialState.like) {
+        onInteract: (v) {
+          // TODO: Maybe update this?
+          if (_state == _TutorialState.like && v.isNotEmpty) {
             _nextState();
             return true;
           } else {

@@ -89,12 +89,16 @@ flutter:
   assets:
     - assets/
     - assets/flags/
+    - assets/interact-icons/
     - assets/tutorial/
 
   fonts:
     - family: Lexend
       fonts:
         - asset: assets/Lexend.ttf
+    - family: Noto Color Emoji
+      fonts:
+        - asset: assets/NotoColorEmoji.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
