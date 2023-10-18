@@ -132,18 +132,10 @@ class _ProfileStackState extends State<ProfileStack> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    // TODO: Update profile page
                     builder: (_) => ProfilePage(
                       profile,
-                      isLiked: _currentProfileInteractions.contains(ProfileInteraction.kiss),
+                      interactions: _currentProfileInteractions,
                       currentPhoto: _currentProfilePhoto,
-                      onLike: (v) => setState(() {
-                        if (v) {
-                          _currentProfileInteractions.add(ProfileInteraction.kiss);
-                        } else {
-                          _currentProfileInteractions.remove(ProfileInteraction.kiss);
-                        }
-                      }),
                       onPhotoChanged: _setPhoto,
                     )));
               },

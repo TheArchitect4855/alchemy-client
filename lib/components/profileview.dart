@@ -1,3 +1,4 @@
+import 'package:alchemy/components/photo_dots.dart';
 import 'package:alchemy/components/profile_interact_buttons.dart';
 import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/data/profile_interaction.dart';
@@ -98,33 +99,12 @@ class ProfileView extends StatelessWidget {
                   ),
                 ]),
                 Wrap(children: profile.buildChips(Colors.white, max: 8)),
-                _buildPhotoDots(),
+                PhotoDots(count: profile.photoUrls.length, index: currentPhoto),
               ],
             )),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPhotoDots() {
-    final dots = <Widget>[];
-    for (var i = 0; i < profile.photoUrls.length; i += 1) {
-      final color = i == currentPhoto ? Colors.white : Colors.white70;
-      dots.add(Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          color: color,
-        ),
-        width: 8,
-        height: 8,
-        margin: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-      ));
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: dots,
     );
   }
 

@@ -1,6 +1,5 @@
 import 'package:alchemy/components/profilechip.dart';
 import 'package:alchemy/gender_kind.dart';
-import 'package:alchemy/strings.dart';
 import 'package:flutter/material.dart';
 
 class Profile {

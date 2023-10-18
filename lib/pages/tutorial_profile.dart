@@ -48,8 +48,7 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
         ProfilePage(
           widget.data.profile,
           currentPhoto: 0,
-          isLiked: false,
-          onLike: null,
+          interactions: null,
           onPhotoChanged: (i) =>
               Logger.info(runtimeType, 'ON PHOTO CHANGED: $i'),
           backButtonKey: _backButtonKey,
