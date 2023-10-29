@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alchemy/data/match.dart';
 import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/logger.dart';
@@ -10,6 +12,7 @@ class ExploreService {
   List<Profile>? _potentialMatches;
   DateTime? _potentialMatchesTs;
   bool _isLoading = false;
+  Future<List<Profile>>? _profilesFuture;
 
   List<Profile>? getPotentialMatches(
     LocationService location,
@@ -17,14 +20,21 @@ class ExploreService {
     void Function(List<Profile> profiles)? onChanged,
   }) {
     Logger.debug(runtimeType, 'Getting potential matches...');
-    final shouldRefresh = _potentialMatches == null ||
-        DateTime.now().difference(_potentialMatchesTs!).inMinutes >= 5;
-    if (shouldRefresh && !_isLoading) {
+    if (_shouldRefresh() && !_isLoading) {
       _isLoading = true;
       _refreshPotentialMatches(location, requests, onChanged);
     }
 
     return _potentialMatches;
+  }
+
+  Future<List<Profile>> getPotentialMatchesAsync(LocationService location, RequestsService requests) {
+    if (_profilesFuture == null) {
+      _isLoading = true;
+      return _refreshPotentialMatches(location, requests, null);
+    } else {
+      return _profilesFuture!;
+    }
   }
 
   Future<Match?> likeProfile(Profile profile, RequestsService requests) async {
@@ -47,21 +57,24 @@ class ExploreService {
     return list.map((v) => Profile.fromJson(v)).toList();
   }
 
-  Future<void> _refreshPotentialMatches(LocationService location,
+  Future<List<Profile>> _refreshPotentialMatches(LocationService location,
       RequestsService requests, void Function(List<Profile>)? onChanged) async {
     Logger.info(runtimeType, 'Refreshing potential matches...');
     final loc = await location.getLocation();
     final locName = await location.getLocationName(loc);
-    final response =
-        await requests.get('/explore', _profilesBuilder, urlParams: {
+    _profilesFuture = requests.get('/explore', _profilesBuilder, urlParams: {
       'lat': loc.latitude.toString(),
       'lon': loc.longitude.toString(),
       'locName': locName,
-    });
+    }).then((e) => e!);
 
+    final response = await _profilesFuture;
     _potentialMatchesTs = DateTime.now();
     _potentialMatches = response!;
     _isLoading = false;
     if (onChanged != null) onChanged(_potentialMatches!);
+    return response;
   }
+
+  bool _shouldRefresh() => _potentialMatches == null || DateTime.now().difference(_potentialMatchesTs!).inMinutes >= 5;
 }

@@ -80,4 +80,28 @@ class Profile {
       return res;
     }
   }
+
+  Profile copyWith(String? pronouns, {
+    String? uid,
+    String? name,
+    int? age,
+    String? bio,
+    String? gender,
+    List<String>? photoUrls,
+    List<String>? relationshipInterests,
+    List<String>? neurodiversities,
+    List<String>? interests,
+    String? city,
+  }) => Profile(
+    uid ?? this.uid,
+    name ?? this.name,
+    age ?? this.age,
+    bio ?? this.bio,
+    gender ?? this.gender,
+    photoUrls ?? this.photoUrls,
+    relationshipInterests ?? this.relationshipInterests,
+    neurodiversities ?? this.neurodiversities,
+    interests ?? this.interests,
+    city ?? this.city,
+    pronouns);
 }

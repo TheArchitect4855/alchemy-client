@@ -58,7 +58,7 @@ class _TutorialPageState extends State<TutorialPage> {
     super.initState();
     _animationTicker = Ticker((elapsed) {
       final infoButtonPosition = (_infoButtonKey.currentContext?.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero);
-      
+
       final likeButtonBox = _likeButtonKey.currentContext?.findRenderObject() as RenderBox?;
       final likeButtonPosition = likeButtonBox?.localToGlobal(Offset.zero);
       if (infoButtonPosition != null || likeButtonPosition != null) {
