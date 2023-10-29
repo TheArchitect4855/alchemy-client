@@ -54,8 +54,8 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
           backButtonKey: _backButtonKey,
         ),
         Positioned(
-          top: _backButtonPosition.dy - 2,
-          left: _backButtonPosition.dx + 4,
+          top: _backButtonPosition.dy - 17,
+          left: _backButtonPosition.dx - 11,
           width: 40,
           height: 40,
           child: IgnorePointer(
@@ -65,7 +65,7 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
           ),
         ),
         Positioned(
-          top: _backButtonPosition.dy - 16,
+          top: _backButtonPosition.dy + 12,
           left: 16,
           right: 24,
           child: Text(widget.data.dialogue['info-2']!,

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ProfileInteractButtons extends StatelessWidget {
   final Profile profile;
   final Set<ProfileInteraction> interactions;
-  final Function(Set<ProfileInteraction>)? onInteract;
+  final void Function(Set<ProfileInteraction>)? onInteract;
 
   const ProfileInteractButtons({super.key, required this.profile, required this.interactions, required this.onInteract});
 

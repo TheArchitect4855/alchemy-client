@@ -61,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(width: 8),
         GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_circle_down, size: 16),
+          child: Icon(Icons.arrow_circle_down, size: 16, key: widget.backButtonKey),
         ),
       ]),
     ];
