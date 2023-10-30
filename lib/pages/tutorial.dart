@@ -100,7 +100,6 @@ class _TutorialPageState extends State<TutorialPage> {
         profiles: [data.profile],
         onPopProfile: (profile, interactions) => _nextState(),
         onInteract: (v) {
-          // TODO: Maybe update this?
           if (_state == _TutorialState.like && v.isNotEmpty) {
             _nextState();
             return true;

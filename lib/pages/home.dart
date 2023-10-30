@@ -152,9 +152,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (interactions.isEmpty) return;
 
     try {
-      // TODO: Update this to use new interactions system
       final match = await ExploreService.instance
-          .likeProfile(profile, RequestsService.instance);
+          .likeProfile(profile, interactions, RequestsService.instance);
 
       if (match != null) {
         _matchesFuture.then((value) => setState(() {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:alchemy/data/match.dart';
 import 'package:alchemy/data/profile.dart';
+import 'package:alchemy/data/profile_interaction.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/services/location.dart';
 import 'package:alchemy/services/requests.dart';
@@ -37,11 +38,12 @@ class ExploreService {
     }
   }
 
-  Future<Match?> likeProfile(Profile profile, RequestsService requests) async {
+  Future<Match?> likeProfile(Profile profile, Set<ProfileInteraction> interactions, RequestsService requests) async {
     final match = await requests.post(
         '/likes',
         {
           'target': profile.uid,
+          'interactions': interactions.map((e) => e.relationshipInterest).toList(),
         },
         (v) => v['match'] as Map<String, dynamic>?);
 
