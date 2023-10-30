@@ -11,7 +11,6 @@ import 'package:alchemy/services/preferences.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:alchemy/snackbar_util.dart';
 import 'package:flutter/material.dart';
-
 import '../components/chipselector.dart';
 
 class PreferencesPage extends StatefulWidget {
@@ -72,14 +71,6 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 value: _preferences!.allowNotifications &&
                     NotificationsService.instance.isEnabled,
                 onChanged: _setAllowNotifications,
-              ),
-              LabeledCheckbox(
-                label: const Text('Show transgender people in my feed'),
-                value: _preferences!.showTransgender,
-                onChanged: (v) => setState(() {
-                  _preferences = _preferences!.copyWith(showTransgender: v);
-                  _isDirty = true;
-                }),
               ),
               ChipSelector(
                 label: 'Show Me',
