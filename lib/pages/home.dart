@@ -4,7 +4,9 @@ import 'package:alchemy/data/profile.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/edit_profile.dart';
 import 'package:alchemy/pages/matches.dart';
+import 'package:alchemy/pages/noconnection.dart';
 import 'package:alchemy/pages/preferences.dart';
+import 'package:alchemy/routing.dart';
 import 'package:alchemy/services/explore.dart';
 import 'package:alchemy/services/match.dart';
 import 'package:alchemy/services/notifications.dart';
@@ -15,7 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:alchemy/data/match.dart';
 import '../services/location.dart';
 
-const timeoutRetryCooldown = Duration(seconds: 30);
+const _matchLoadMaxRetries = 3;
+const _timeoutRetryCooldown = Duration(seconds: 10);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,6 +34,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Profile>? _exploreProfiles;
   int _exploreProfileIndex = 0;
   int _numUnreadConversations = 0;
+  int _matchLoadRetryCount = 0;
 
   @override
   void initState() {
@@ -120,8 +124,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       Logger.warnException(runtimeType, e);
 
       // If there was a client exception, wait a bit and try again
-      await Future.delayed(timeoutRetryCooldown);
-      _loadMatches();
+      if (_matchLoadRetryCount < _matchLoadMaxRetries) {
+        _matchLoadRetryCount += 1;
+        await Future.delayed(_timeoutRetryCooldown);
+        _loadMatches();
+      } else if (mounted) {
+        replaceRoute(context, const NoConnectionPage());
+      } else {
+        Logger.error(runtimeType, 'Context was unmounted while handling network error: $e');
+      }
     } on Exception catch (e) {
       Logger.exception(runtimeType, e);
     }
