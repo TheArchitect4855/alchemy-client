@@ -1,12 +1,13 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
+import 'package:alchemy/encoding.dart';
+import 'package:alchemy/hmac.dart';
 import 'package:alchemy/services/requests.dart';
+import 'package:alchemy/string_ring_buffer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'encoding.dart';
-import 'hmac.dart';
 
 enum LogLevel {
   debug(0),
@@ -20,64 +21,29 @@ enum LogLevel {
 }
 
 class Logger {
-  static LogLevel level = kDebugMode ? LogLevel.debug : LogLevel.warn;
-  static final _logFile = kIsWeb
-      ? null
-      : getApplicationDocumentsDirectory().then((v) =>
-      File('${v.path}/${DateTime.now().toIso8601String()}.log')
-          .openWrite(mode: FileMode.append));
+  static LogLevel level = LogLevel.warn;
+  static final StringRingBuffer _buffer = StringRingBuffer(8192);
 
   static void debug(Type context, String message) => _log(LogLevel.debug, context, message);
   static void info(Type context, String message) => _log(LogLevel.info, context, message);
   static void warn(Type context, String message) => _log(LogLevel.warn, context, message);
   static void warnException(Type context, Exception exception) => _log(LogLevel.warn, context, exception.toString());
   static void error(Type context, String message) => _log(LogLevel.error, context, message);
-  static void exception(Type context, Exception exception) => _log(LogLevel.error, context, exception.toString());
 
-  static Future<void> uploadPastLogs(RequestsService requests) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final entries = await dir.list().toList();
-    final stats = entries.map((e) => e.statSync()).toList();
-    final logFileIndices = <int>[];
-    for (var i = 0; i < entries.length; i += 1) {
-      if (stats[i].type != FileSystemEntityType.file ||
-          !entries[i].path.endsWith('.log')) continue;
+  static void exception(Type context, Exception exception) {
+    _log(LogLevel.error, context, exception.toString());
 
-      logFileIndices.add(i);
-    }
-
-    logFileIndices.sort((a, b) {
-      final aMtime = stats[a].modified;
-      final bMtime = stats[b].modified;
-      return -(aMtime.compareTo(bMtime));
-    });
-
-    const maxUpload = 1e6;
-    var totalUpload = 0;
-    var i = 0;
-    final upload = <int>[];
-    while (totalUpload < maxUpload && i < logFileIndices.length) {
-      final s = stats[logFileIndices[i]];
-      if (totalUpload + s.size >= maxUpload) break;
-      totalUpload += s.size;
-
-      final stream = File(entries[logFileIndices[i]].path).openRead();
-      final data = await stream.fold(<int>[], (p, e) {
-        p.addAll(e);
-        return p;
+    final bytes = _buffer.asBytes();
+    _buffer.clear();
+    _getLogSignature()
+      .then((v) => RequestsService.instance.postBinary('/logs', bytes, 'application/octet-stream', (v) => v, urlParams: v))
+      .catchError((e) {
+        print('Error uploading logs: $e');
+        return null;
       });
-
-      upload.addAll(data);
-      i += 1;
-    }
-
-    final sig = await getLogSignature();
-    await requests.postBinary('/logs', Uint8List.fromList(upload),
-        'application/octet-stream', (v) => v,
-        urlParams: sig);
   }
 
-  static Future<Map<String, String>> getLogSignature() async {
+  static Future<Map<String, String>> _getLogSignature() async {
     const storage = FlutterSecureStorage();
     const key = 'logs-uid';
     var uid = await storage.read(key: key);
@@ -106,16 +72,14 @@ class Logger {
   }
 
   static void _log(LogLevel level, Type context, String message) async {
-    if (level.priority < Logger.level.priority) return;
+    if (level.priority < Logger.level.priority && !kDebugMode) return;
     final now = DateTime.now();
     final timestamp = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
     final tag = level.name.toUpperCase();
 
-    if (kDebugMode || _logFile == null) print('[$tag $timestamp] $context: $message');
-    if (_logFile == null) return;
+    if (kDebugMode) print('[$tag $timestamp] $context: $message');
 
     try {
-      final sink = await _logFile;
       final logJson = jsonEncode({
         'tag': tag,
         'context': context.toString(),
@@ -123,7 +87,11 @@ class Logger {
         'timestamp': now.toIso8601String(),
       });
 
-      sink!.writeln(logJson);
+      if (kDebugMode && level.priority >= Logger.level.priority && logJson.length + 1 >= _buffer.capacity) {
+        print('LOG IS TOO BIG FOR BUFFER: $logJson');
+      } else if (logJson.length + 1 < _buffer.capacity) {
+        _buffer.add('$logJson\n');
+      }
     } on Exception catch (e) {
       if (kDebugMode) print('!!!FAILED WRITING TO LOG FILE!!!\n$e');
     }

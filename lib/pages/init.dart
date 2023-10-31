@@ -73,8 +73,6 @@ class _InitPageState extends State<InitPage> {
     if (!CallingCode.isLoaded) await CallingCode.loadCallingCodes();
 
     final authService = AuthService.instance;
-    _checkLogRequests(requestsService);
-
     try {
       await authService.initialize(requestsService);
     } on RequestsServiceHttpException catch (e) {
@@ -181,19 +179,5 @@ class _InitPageState extends State<InitPage> {
     }
 
     replaceRoute(context, const HomePage());
-  }
-
-  void _checkLogRequests(RequestsService requests) async {
-    try {
-      final sig = await Logger.getLogSignature();
-      final logsRequested = await requests
-          .get('/logs', (v) => v['logsRequested'] as bool, urlParams: sig);
-
-      if (logsRequested == true) {
-        await Logger.uploadPastLogs(requests);
-      }
-    } on Exception catch (e) {
-      Logger.exception(runtimeType, e);
-    }
   }
 }
