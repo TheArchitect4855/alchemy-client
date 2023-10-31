@@ -83,6 +83,7 @@ class _TutorialPageState extends State<TutorialPage> {
   Widget _buildTutorial(BuildContext context, BoxConstraints constraints, TutorialData data) {
     final theme = Theme.of(context);
     final home = HomeScaffold(
+      onWillPop: () async => false,
       body: ProfileStack(
         infoButtonKey: _infoButtonKey,
         likeButtonKey: _likeButtonKey,

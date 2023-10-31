@@ -30,6 +30,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late final FcmNotificationsService? _notificationsService;
   late Future<List<Match>> _matchesFuture;
+  final List<int> _history = [];
   int _currentIndex = 0;
   List<Profile>? _exploreProfiles;
   int _exploreProfileIndex = 0;
@@ -82,13 +83,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       body: currentView,
       currentIndex: _currentIndex,
       messageNotificationBadge: _numUnreadConversations,
-      onNavTapped: (v) => setState(() {
-        if (v == 0) _updateExploreProfiles();
-        _currentIndex = v;
-      }),
+      onNavTapped: (v) {
+        _history.add(_currentIndex);
+        _setNav(v);
+      },
       onSettingsPressed: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const PreferencesPage()))
           .then((v) => _updateExploreProfiles()),
+      onWillPop: () async {
+        if (_history.isEmpty) return true;
+
+        final last = _history.removeLast();
+        _setNav(last);
+        return false;
+      },
     );
   }
 
@@ -175,6 +183,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       Logger.warnException(runtimeType, e);
       textSnackbar(context, 'Error liking profile');
     }
+  }
+
+  void _setNav(int index) {
+    setState(() {
+      if (index == 0) _updateExploreProfiles();
+      _currentIndex = index;
+    });
   }
 
   void _updateExploreProfiles() {
