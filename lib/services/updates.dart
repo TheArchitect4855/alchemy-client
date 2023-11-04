@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:alchemy/logger.dart';
+import 'package:alchemy/semver.dart';
 import 'package:alchemy/services/requests.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -15,9 +16,15 @@ class UpdatesService {
   }
 
   Future<bool> isUpdateRequired(RequestsService requests) async {
-    final versionInfo = await _getAppVersion(requests);
-    final packageInfo = await PackageInfo.fromPlatform();
-    return versionInfo.version != packageInfo.version && versionInfo.isUpdateRequired;
+    try {
+      final versionInfo = await _getAppVersion(requests);
+      final packageInfo = await PackageInfo.fromPlatform();
+      final packageVersion = SemVer.parse(packageInfo.version);
+      return versionInfo.version > packageVersion && versionInfo.isUpdateRequired && versionInfo.releaseDate.isBefore(DateTime.now());
+    } on FormatException catch (e) {
+      Logger.exception(runtimeType, e);
+      return true;
+    }
   }
 
   Future<_AppVersion> _getAppVersion(RequestsService requests) async {
@@ -29,13 +36,13 @@ class UpdatesService {
 }
 
 class _AppVersion {
-  final String version;
+  final SemVer version;
   final bool isUpdateRequired;
   final DateTime releaseDate;
   final _AppVersionDownloads downloads;
 
   _AppVersion.fromJson(Map<String, dynamic> data)
-    : version = data['version'],
+    : version = SemVer.parse(data['version']),
     isUpdateRequired = data['isUpdateRequired'],
     releaseDate = DateTime.parse(data['releaseDate']),
     downloads = _AppVersionDownloads.fromJson(data['downloads']);
