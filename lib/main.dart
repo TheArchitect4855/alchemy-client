@@ -29,6 +29,7 @@ final textTheme = baseTextTheme
     )
     .apply(
       fontFamily: 'Lexend',
+      fontFamilyFallback: [ 'Noto Color Emoji' ],
       displayColor: Colors.black,
       bodyColor: Colors.black,
     );

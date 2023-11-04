@@ -48,15 +48,14 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
         ProfilePage(
           widget.data.profile,
           currentPhoto: 0,
-          isLiked: false,
-          onLike: null,
+          interactions: null,
           onPhotoChanged: (i) =>
               Logger.info(runtimeType, 'ON PHOTO CHANGED: $i'),
           backButtonKey: _backButtonKey,
         ),
         Positioned(
-          top: _backButtonPosition.dy - 2,
-          left: _backButtonPosition.dx + 4,
+          top: _backButtonPosition.dy - 17,
+          left: _backButtonPosition.dx - 11,
           width: 40,
           height: 40,
           child: IgnorePointer(
@@ -66,7 +65,7 @@ class _TutorialProfilePageState extends State<TutorialProfilePage> {
           ),
         ),
         Positioned(
-          top: _backButtonPosition.dy - 16,
+          top: _backButtonPosition.dy + 12,
           left: 16,
           right: 24,
           child: Text(widget.data.dialogue['info-2']!,

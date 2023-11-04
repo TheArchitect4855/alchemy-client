@@ -1,9 +1,11 @@
 import 'package:alchemy/components/blink.dart';
 import 'package:alchemy/components/floating_text.dart';
 import 'package:alchemy/components/home_scaffold.dart';
+import 'package:alchemy/components/profile_interact_buttons.dart';
 import 'package:alchemy/components/profilestack.dart';
 import 'package:alchemy/components/tappy_hand.dart';
 import 'package:alchemy/components/tutorial_swipe_animation.dart';
+import 'package:alchemy/data/profile_interaction.dart';
 import 'package:alchemy/data/tutorial.dart';
 import 'package:alchemy/logger.dart';
 import 'package:alchemy/pages/tutorial_profile.dart';
@@ -13,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'init.dart';
 
-const tutorialStatusKey = 'SHOWN_TUTORIAL';
+const tutorialStatusKey = 'SHOWN_TUTORIAL_V2';
 
 class TutorialPage extends StatefulWidget {
   const TutorialPage({super.key});
@@ -27,7 +29,12 @@ enum _TutorialState {
   photos1(_TutorialState.photos2),
   photos2(_TutorialState.info1),
   info1(_TutorialState.info2),
-  info2(_TutorialState.like),
+  info2(_TutorialState.interact1),
+  interact1(_TutorialState.interact2),
+  interact2(_TutorialState.interact3),
+  interact3(_TutorialState.interact4),
+  interact4(_TutorialState.interact5),
+  interact5(_TutorialState.like),
   like(_TutorialState.swipe),
   swipe(_TutorialState.outro),
   outro(null);
@@ -43,6 +50,7 @@ class _TutorialPageState extends State<TutorialPage> {
   final _likeButtonKey = GlobalKey(debugLabel: 'Profile View Like Button');
   var _infoButtonPosition = Offset.zero;
   var _likeButtonPosition = Offset.zero;
+  var _likeButtonSize = Size.zero;
   var _state = _TutorialState.intro;
 
   @override
@@ -50,11 +58,14 @@ class _TutorialPageState extends State<TutorialPage> {
     super.initState();
     _animationTicker = Ticker((elapsed) {
       final infoButtonPosition = (_infoButtonKey.currentContext?.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero);
-      final likeButtonPosition = (_likeButtonKey.currentContext?.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero);
+
+      final likeButtonBox = _likeButtonKey.currentContext?.findRenderObject() as RenderBox?;
+      final likeButtonPosition = likeButtonBox?.localToGlobal(Offset.zero);
       if (infoButtonPosition != null || likeButtonPosition != null) {
         setState(() {
           _infoButtonPosition = infoButtonPosition ?? _infoButtonPosition;
           _likeButtonPosition = likeButtonPosition ?? _likeButtonPosition;
+          _likeButtonSize = likeButtonBox?.size ?? _likeButtonSize;
         });
       }
     });
@@ -89,9 +100,9 @@ class _TutorialPageState extends State<TutorialPage> {
         likeButtonKey: _likeButtonKey,
         profiles: [data.profile],
         onRefresh: null,
-        onPopProfile: (profile, isLiked) => _nextState(),
-        onLike: () {
-          if (_state == _TutorialState.like) {
+        onPopProfile: (profile, interactions) => _nextState(),
+        onInteract: (v) {
+          if (_state == _TutorialState.like && v.isNotEmpty) {
             _nextState();
             return true;
           } else {
@@ -145,22 +156,35 @@ class _TutorialPageState extends State<TutorialPage> {
         stack = [
           home,
           Positioned(
-              top: _infoButtonPosition.dy - 17,
-              left: _infoButtonPosition.dx - 11,
+              top: _infoButtonPosition.dy - 2,
+              left: _infoButtonPosition.dx + 4,
               width: 40,
               height: 40,
               child: IgnorePointer(
                 child: Blink(interval: const Duration(milliseconds: 500), child: Image.asset('assets/tutorial/flash.png')),
               )),
           Positioned(
-            top: _infoButtonPosition.dy - 64,
-            left: 32,
-            width: _infoButtonPosition.dx - 16,
-            child: FloatingText(data.dialogue['info-1']!, style, TextAlign.right),
+            bottom: constraints.maxHeight - _infoButtonPosition.dy,
+            left: 16,
+            width: _infoButtonPosition.dx * 2,
+            child: FloatingText(data.dialogue['info-1']!, style, TextAlign.center),
           )
         ];
       case _TutorialState.info2:
         stack = [home];
+        break;
+      case _TutorialState.interact1:
+        stack = _profileInteractStage(constraints, style, home, data, 'interact-1', null);
+        break;
+      case _TutorialState.interact2:
+        stack = _profileInteractStage(constraints, style, home, data, 'interact-2', 0);
+        break;
+      case _TutorialState.interact3:
+        stack = _profileInteractStage(constraints, style, home, data, 'interact-3', 1);
+      case _TutorialState.interact4:
+        stack = _profileInteractStage(constraints, style, home, data, 'interact-4', 2);
+      case _TutorialState.interact5:
+        stack = _profileInteractStage(constraints, style, home, data, 'interact-5', null);
         break;
       case _TutorialState.like:
         stack = [
@@ -171,9 +195,9 @@ class _TutorialPageState extends State<TutorialPage> {
             child: const TappyHand(size: 32),
           ),
           Positioned(
-            top: _likeButtonPosition.dy - 32,
+            bottom: constraints.maxHeight - _likeButtonPosition.dy,
             right: 32,
-            width: _likeButtonPosition.dx - 32,
+            width: _likeButtonPosition.dx,
             child: FloatingText(data.dialogue['like']!, style, TextAlign.right),
           ),
         ];
@@ -264,6 +288,56 @@ class _TutorialPageState extends State<TutorialPage> {
 
       if (_state == _TutorialState.info2) _showTutorialProfile();
     });
+  }
+
+  List<Widget> _profileInteractStage(
+    BoxConstraints constraints,
+    TextStyle floatingTextStyle,
+    Widget home,
+    TutorialData data,
+    String dialogueKey,
+    int? index
+  ) {
+    return [
+      home,
+      Positioned(
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        child: ColoredBox(
+          color: Colors.black54,
+          child: GestureDetector(onTap: () => _nextState()),
+        ),
+      ),
+      Positioned(
+        left: _likeButtonPosition.dx,
+        top: _likeButtonPosition.dy,
+        width: _likeButtonSize.width,
+        height: _likeButtonSize.height,
+        child: ProfileInteractButtons(
+          profile: data.profile,
+          interactions: index == null ? const {} : { ProfileInteraction.values[index] },
+          onInteract: null,
+        ),
+      ),
+      // Positioned(
+      //   left: _likeButtonPosition.dx,
+      //   top: _likeButtonPosition.dy,
+      //   width: _likeButtonSize.width,
+      //   height: _likeButtonSize.height,
+      //   child: DecoratedBox(decoration: BoxDecoration(
+      //     border: Border.all(color: Colors.white, width: 2),
+      //     borderRadius: BorderRadius.circular(4),
+      //   )),
+      // ),
+      Positioned(
+        left: _likeButtonPosition.dx - _likeButtonSize.width / 2,
+        bottom: constraints.maxHeight - _likeButtonPosition.dy + 4,
+        width: _likeButtonSize.width * 1.5,
+        child: FloatingText(data.dialogue[dialogueKey]!, floatingTextStyle, TextAlign.right),
+      ),
+    ];
   }
 
   void _showTutorialProfile() async {

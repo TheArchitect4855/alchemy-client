@@ -53,6 +53,17 @@ class MatchesPage extends StatelessWidget {
               }
 
               final size = MediaQuery.of(context).size;
+              final badges = <Widget>[];
+              for (final interaction in match.interactions) {
+                badges.add(Image.asset(
+                  interaction.getIconFile(),
+                  height: 16,
+                  fit: BoxFit.contain,
+                ));
+              }
+
+              if (match.numUnread > 0) badges.add(NumberBadge(number: match.numUnread));
+
               return InkWell(
                 onTap: () => _openMessages(context, match),
                 child: Padding(
@@ -82,9 +93,10 @@ class MatchesPage extends StatelessWidget {
                       Expanded(
                           child: Align(
                         alignment: Alignment.centerRight,
-                        child: match.numUnread > 0
-                            ? NumberBadge(number: match.numUnread)
-                            : null,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: badges,
+                        ),
                       )),
                     ],
                   ),

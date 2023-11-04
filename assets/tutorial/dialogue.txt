@@ -1,5 +1,5 @@
 [intro]
-Welcome to Alchemy, the dating app for neurodiverse people!
+Welcome to Alchemy, the social app for neurodiverse people!
 
 This is a short tutorial that will get you started with the
 app.
@@ -18,8 +18,26 @@ Tap here to learn more about your potential match!
 [info-2]
 Once you're done, tap here to go back!
 
+[interact-1]
+These are the profile interaction buttons!
+
+(tap the screen to continue)
+
+[interact-2]
+Waving at someone means you want to be friends...
+
+[interact-3]
+The smooch button means you want to smooch 😏
+
+[interact-4]
+and the rose means you're looking for romance!
+
+[interact-5]
+These buttons are based on the relationship preferences
+you've selected, and can be changed in your profile.
+
 [like]
-Tap the like button to show them you're interested!
+Wave to show them you're interested!
 
 [swipe]
 Finally, swipe up to see the next profile...

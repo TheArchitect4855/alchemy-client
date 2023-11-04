@@ -217,17 +217,16 @@ class _ChatPageState extends State<ChatPage> {
 
   void _openProfile() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => ProfilePage(
-                  widget.profile,
-                  currentPhoto: _profileCurrentPhoto,
-                  isLiked: true,
-                  onLike: null,
-                  onPhotoChanged: (photo) => setState(() {
-                    _profileCurrentPhoto = photo;
-                  }),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfilePage(
+            widget.profile,
+            currentPhoto: _profileCurrentPhoto,
+            interactions: null,
+            onPhotoChanged: (photo) => setState(() {
+              _profileCurrentPhoto = photo;
+            }),
+          )));
   }
 
   void _sendMessage() async {
