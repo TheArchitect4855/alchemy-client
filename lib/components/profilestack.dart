@@ -18,10 +18,12 @@ class ProfileStack extends StatefulWidget {
   final bool Function()? onLike;
   final bool Function()? onPhotoChanged;
   final bool Function()? onPressDetails;
+  final void Function()? onRefresh;
 
   const ProfileStack(
       {required this.profiles,
       required this.onPopProfile,
+      required this.onRefresh,
       this.onLike,
       this.onPhotoChanged,
       this.onPressDetails,
@@ -61,7 +63,7 @@ class _ProfileStackState extends State<ProfileStack> {
   Widget build(BuildContext context) {
     if (widget.profiles.isEmpty) {
       final profile = AuthService.instance.profile!;
-      return NoProfiles(imageUrl: profile.photoUrls[0]);
+      return NoProfiles(imageUrl: profile.photoUrls[0], onRefresh: widget.onRefresh);
     }
 
     Widget under;
@@ -76,7 +78,7 @@ class _ProfileStackState extends State<ProfileStack> {
       );
     } else {
       final profile = AuthService.instance.profile!;
-      under = NoProfiles(imageUrl: profile.photoUrls[0]);
+      under = NoProfiles(imageUrl: profile.photoUrls[0], onRefresh: widget.onRefresh);
     }
 
     final profile = widget.profiles[0];

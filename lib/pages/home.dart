@@ -62,7 +62,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         if (_exploreProfiles == null) {
           currentView = const Center(child: CircularProgressIndicator());
         } else {
-          currentView = ProfileStack(profiles: _exploreProfiles!.sublist(_exploreProfileIndex), onPopProfile: _onPopProfile);
+          currentView = ProfileStack(
+            profiles: _exploreProfiles!.sublist(_exploreProfileIndex),
+            onPopProfile: _onPopProfile,
+            onRefresh: _exploreProfiles!.isEmpty ? null : () => setState(() {
+              _exploreProfileIndex = 0;
+            }),
+          );
         }
 
         break;
