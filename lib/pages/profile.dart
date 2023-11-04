@@ -51,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
             IconButton(
                   key: widget.backButtonKey,
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_circle_down, size: 18, color: Colors.black45),
+              icon: const Icon(Icons.arrow_circle_down, size: 24, color: Colors.black45),
             ),
           ],
         ),
