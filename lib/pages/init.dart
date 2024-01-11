@@ -12,7 +12,6 @@ import 'package:alchemy/pages/signup/intake.dart';
 import 'package:alchemy/pages/signup/photos.dart';
 import 'package:alchemy/pages/signup/tos.dart';
 import 'package:alchemy/pages/tutorial.dart';
-import 'package:alchemy/pages/unavailable.dart';
 import 'package:alchemy/pages/update_required.dart';
 import 'package:alchemy/services/auth.dart';
 import 'package:alchemy/services/location.dart';
@@ -108,13 +107,6 @@ class _InitPageState extends State<InitPage> {
     final locationService = LocationService.instance;
     try {
       if (!locationService.isInitialized) await locationService.initialize();
-
-      bool isAvailable = await authService.isAppAvailableInArea(
-          locationService, requestsService);
-      if (!isAvailable) {
-        replaceRoute(context, const UnavailablePage());
-        return;
-      }
     } on LocationServiceInvalidException catch (e) {
       Logger.exception(runtimeType, e);
       replaceRoute(context, ErrorPage(message: e.message));
